@@ -81,7 +81,7 @@ char buf[64] =
 { 0, };
 uint16_t x = 0;
 uint16_t y = 0;
-active_game_screen screen = MAIN_MENU;
+game_screen screen = MAIN_MENU;
 uint16_t edit_score = 0;							//Признак редактирования счёта...
 /* USER CODE END PV */
 
