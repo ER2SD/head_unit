@@ -12,7 +12,7 @@
 #include "stdio.h"
 #include "fonts.h"
 
-extern uint16_t screen;
+extern game_screen screen;
 extern uint16_t teams;
 extern uint16_t pressed_btn_team;
 extern uint16_t scores[8];
