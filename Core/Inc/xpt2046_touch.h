@@ -17,6 +17,6 @@ extern SPI_HandleTypeDef hspi2;
 uint8_t ILI9341_TouchGetCoordinates(uint16_t *x, uint16_t *y);
 void enable_score_editing(void);
 void score_editing_handler(void);
-void do_reset_timer(void);
+void hide_reset_timer_button(void);
 
 #endif

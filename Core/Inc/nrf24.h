@@ -58,6 +58,8 @@ void NRF24_ini(void);
 uint8_t NRF24_ReadReg(uint8_t addr);
 uint8_t NRF24L01_Send(uint8_t *pBuf);
 uint8_t NRF24L01_Receive(void);
+
+void Blink_LED(void);
 //>>>>>>>>>>
 
 #endif /* INC_NRF24_H_ */

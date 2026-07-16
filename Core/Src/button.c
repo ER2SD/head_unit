@@ -30,6 +30,7 @@ extern uint16_t scores[8];							//количество очков команд 
 extern volatile int g_timer_seconds;				//Начальное значение таймера
 extern volatile uint8_t reset_timer;		//старт/стоп таймера
 extern uint16_t teams;									//номер команды
+extern uint16_t teams_fs_state[8];          // Teams false start state
 extern uint16_t answer;											//положительный или отрицательный ответ
 
 // macros to check the coordinates in range
@@ -62,12 +63,12 @@ uint8_t Button_Read_left(void)
 	return 0;
 }
 //=======Обработчик сентральной кнопки KEY2==================
-uint8_t Button_Read_centr(void)
+uint8_t Button_Read_center(void)
 {
 	static uint32_t last_time = 0;
 	static uint8_t last_state = 0;
 	uint8_t current_state;
-	current_state = HAL_GPIO_ReadPin(BUTTON_PORT, BUTTON_PIN_CENTR);
+	current_state = HAL_GPIO_ReadPin(BUTTON_PORT, BUTTON_PIN_CENTER);
 	if (current_state != last_state)
 	{
 		if (HAL_GetTick() - last_time > 20) // 20 мс антидребезг
@@ -105,12 +106,59 @@ static const char *const team_names[] =
 static const uint16_t team_y_pos[] =
 { 50, 70, 90, 110, 130, 150, 170, 190 };
 
-void Button_Press_handler(void)
+void Show_reset_timer_button(void)
+{
+	ILI9341_Draw_Filled_Rectangle_Coord(220, 80, 280, 120, WHITE);
+	ILI9341_WriteString(233, 90, "RESET", Font_7x10, BLACK, WHITE);
+	ILI9341_WriteString(232, 105, "TIMER", Font_7x10, BLACK, WHITE);
+}
+
+void NRF_Event_handler(void)
 {
 	uint8_t status;
-	status = NRF24_ReadReg(STATUS);
+	status = NRF24_ReadReg(STATUS) & 0x40;
+	if (!status)
+	{
+		return;
+	}
+	Blink_LED();
+
+	switch (screen)
+	{
+	case 1:
+		rx_data = NRF24L01_Receive();
+		if (rx_data < 0x01 || rx_data > 0x08)
+		{
+			return;
+		}
+		uint8_t team_idx = rx_data - 1;
+		uint8_t is_false_start = (falstart_enabled && timer_running == 0);
+
+		pressed_btn_team = rx_data;
+
+		if (is_false_start)
+		{
+			ILI9341_WriteString(7, team_y_pos[team_idx], team_names[team_idx], Font_11x18, BLACK, MYFON);
+			ILI9341_WriteString(175, team_y_pos[team_idx] + 2, "!", Font_11x18, RED, MYFON);
+			Show_reset_timer_button();
+		}
+		else
+		{
+			ILI9341_WriteString(7, team_y_pos[team_idx], team_names[team_idx], Font_11x18, YELLOW, MYFON);
+		}
+		HAL_TIM_Base_Stop_IT(&htim2);
+		break;
+	case 2:
+		break;
+	case 3:
+		break;
+	default:
+		return;
+	}
+
 	if (status & 0x40 && screen == 1)
 	{
+
 		rx_data = NRF24L01_Receive();
 		if (rx_data >= 0x01 && rx_data <= 0x08)
 		{
@@ -123,23 +171,17 @@ void Button_Press_handler(void)
 			{
 				ILI9341_WriteString(7, team_y_pos[team_idx], team_names[team_idx], Font_11x18, BLACK, MYFON);
 				ILI9341_WriteString(175, team_y_pos[team_idx] + 2, "!", Font_11x18, RED, MYFON);
+				Show_reset_timer_button();
 			}
 			else
 			{
-				LED_ON;
 				ILI9341_WriteString(7, team_y_pos[team_idx], team_names[team_idx], Font_11x18, YELLOW, MYFON);
-			}
-
-			if (is_false_start)
-			{
-				ILI9341_Draw_Filled_Rectangle_Coord(220, 80, 280, 120, WHITE);
-				ILI9341_WriteString(233, 90, "RESET", Font_7x10, BLACK, WHITE);
-				ILI9341_WriteString(232, 105, "TIMER", Font_7x10, BLACK, WHITE);
 			}
 		}
 		HAL_TIM_Base_Stop_IT(&htim2);
 	}
 }
+
 void Touchscreen_handler(void)
 {
 	if (HAL_GPIO_ReadPin(GPIOB, T_IRQ_Pin) == GPIO_PIN_RESET && flag_press) //если нажат тачскрин
@@ -209,20 +251,19 @@ void Touchscreen_handler(void)
 				screen = SETTINGS;
 				break;
 			}
-			//-----------------------------------------------------------------------------------------------------------------------------------
 		case BRAIN_RING:
 			enable_score_editing(); //редактирование результата
 			if (falstart_enabled)
 			{
-				do_reset_timer(); //выключение кнопки "reset timer"
+				hide_reset_timer_button(); //выключение кнопки "reset timer"
 			}
             if (IS_WITHIN(x, y, 300, 0, 320, 20)) //если нажали крестик
 			{
+				LED_OFF;
 				screen_menu();
 				screen = MAIN_MENU;
 			}
 			break;
-			//-----------------------------------------------------------------------------------------------------------------------------------
 		case SIMPLE:
             if (IS_WITHIN(x, y, 300, 0, 320, 20)) //если нажали крестик
 			{
@@ -230,7 +271,13 @@ void Touchscreen_handler(void)
 				screen = MAIN_MENU;
 			}
 			break;
-			//-----------------------------------------------------------------------------------------------------------------------------------
+		case ERUDIT:
+			if (x > 300 && x < 320 && y > 0 && y < 20) //если нажали крестик
+			{
+				screen_menu();
+				screen = MAIN_MENU;
+			}
+			break;			
 		case SETTINGS: 	//=============="setting"=================
 			if (IS_WITHIN(x, y, 300, 0, 320, 20)) // если нажали крестик
 			{

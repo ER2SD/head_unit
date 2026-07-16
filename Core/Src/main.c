@@ -69,6 +69,8 @@ uint8_t timer_running = 0;   			//0 = стоп, 1 = работает
 uint8_t btn_prev = 1;        			//предыдущее состояние кнопки
 char lcd_buf[16];									//буфер значения таймера
 uint16_t teams = 2;								//номер команды
+uint16_t teams_fs_state[8] =
+{ 0 };								// Teams false start state
 uint16_t pressed_btn_team = 0;								//номер нажатой кнопки команды
 uint16_t scores[8] =
 { 0 };						//количество очков команд [0-7]
@@ -172,7 +174,7 @@ int main(void)
 			reset_color();																//установка цвета комманд для сделующего вопроса.
 			reset_falsstart();																						//сброс фальшстарта
 		}
-		Button_Press_handler(); 										//Обработчик сигналов с кнопок передатчиков
+		NRF_Event_handler(); 										//Обработчик сигналов с кнопок передатчиков
 		Touchscreen_handler();						//Обработчик тачскрина
 
 		//>>>>>>>>>>Обработчик нажатия кнопок. Для каждого экрана своя логика
@@ -213,7 +215,7 @@ int main(void)
 			{
 				//Код для экрана "эрудит"
 			}
-			if (Button_Read_centr() && screen == 1)
+			if (Button_Read_center() && screen == 1)
 			{
 				timer_running = 1;
 				HAL_TIM_Base_Start_IT(&htim2);

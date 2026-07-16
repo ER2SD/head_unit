@@ -212,3 +212,10 @@ void NRF24_PrintReg(char *name, uint8_t reg)
 	sprintf(str1, "%s: 0x%02X\r\n", name, value);
 	HAL_UART_Transmit(&huart1, (uint8_t*) str1, strlen(str1), 0x1000);
 }
+
+void Blink_LED(void)
+{
+	LED_ON;
+	HAL_Delay(500);   // on for 1/2 second
+	LED_OFF;
+}
