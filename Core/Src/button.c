@@ -22,7 +22,7 @@ extern uint8_t flag_press;
 extern uint32_t time_press;
 extern uint16_t x;
 extern uint16_t y;
-extern uint16_t screen;
+extern game_screen screen;
 extern char buf[64];
 
 extern uint16_t scores[8];							//количество очков команд [0-7]
