@@ -125,7 +125,7 @@ void NRF_Event_handler(void)
 
 	switch (screen)
 	{
-	case 1:
+	case BRAIN_RING:
 		rx_data = NRF24L01_Receive();
 		if (rx_data < 0x01 || rx_data > 0x08)
 		{
@@ -148,15 +148,15 @@ void NRF_Event_handler(void)
 		}
 		HAL_TIM_Base_Stop_IT(&htim2);
 		break;
-	case 2:
+	case SIMPLE:
 		break;
-	case 3:
+	case ERUDIT:
 		break;
 	default:
 		return;
 	}
 
-	if (status & 0x40 && screen == 1)
+	if (status & 0x40 && screen == BRAIN_RING)
 	{
 
 		rx_data = NRF24L01_Receive();
@@ -282,7 +282,7 @@ void Touchscreen_handler(void)
 			if (IS_WITHIN(x, y, 300, 0, 320, 20)) // если нажали крестик
 			{
 				screen_menu();
-				screen = 0;
+				screen = MAIN_MENU;
 			}
             else if (IS_WITHIN(x, y, 40, 80, 60, 100)) //Фальшстарт ON
 			{

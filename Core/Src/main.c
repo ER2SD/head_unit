@@ -185,7 +185,7 @@ int main(void)
 		else
 		{
 
-			if (Button_Read_left() && screen == 1 && timer_running == 1)
+			if (Button_Read_left() && screen == BRAIN_RING && timer_running == 1)
 			{
 				//обработка состояния таймера
 				timer_running = 0;
@@ -197,11 +197,11 @@ int main(void)
 				reset_color();											//установка цвета комманд для сделующего вопроса.
 				reset_falsstart();
 			}
-			else if (Button_Read_left() && screen == 4)
+			else if (Button_Read_left() && screen == ERUDIT)
 			{
 				//Код для экрана "эрудит"
 			}
-			if (Button_Read_right() && screen == 1 && timer_running == 1)
+			if (Button_Read_right() && screen == BRAIN_RING && timer_running == 1)
 			{
 				timer_running = 0;
 				pressed_btn_team = rx_data;
@@ -211,16 +211,16 @@ int main(void)
 				//ILI9341_WriteString(230, 25, lcd_buf, Font_16x26, RED, MYFON); // вывод показаний таймера
 				button_event_handler();							//Если ответ не верный-команда выбывает (цвет надписи команды чёрный)
 			}
-			else if (Button_Read_left() && screen == 4)
+			else if (Button_Read_left() && screen == ERUDIT)
 			{
 				//Код для экрана "эрудит"
 			}
-			if (Button_Read_center() && screen == 1)
+			if (Button_Read_center() && screen == BRAIN_RING)
 			{
 				timer_running = 1;
 				HAL_TIM_Base_Start_IT(&htim2);
 			}
-			else if (Button_Read_left() && screen == 4)
+			else if (Button_Read_left() && screen == ERUDIT)
 			{
 				//Код для экрана "эрудит"
 			}
@@ -231,7 +231,7 @@ int main(void)
 		{
 			reset_timer = 0;
 			sprintf(lcd_buf, "%02d ", g_timer_seconds);
-			if (screen == 1)
+			if (screen == BRAIN_RING)
 			{
 				ILI9341_WriteString(230, 25, lcd_buf, Font_16x26, RED, MYFON); // вывод показаний таймера
 			}

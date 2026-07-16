@@ -96,7 +96,7 @@ void reset_color(void)
 //============= экран выбора игры =====================
 void screen_menu()
 {
-	screen = 0;
+	screen = MAIN_MENU;
 	ILI9341_Fill_Screen(YELLOW);
 	ILI9341_Draw_Filled_Rectangle_Coord(10, 10, 310, 230, RED);
 	ILI9341_WriteString(128, 12, "CMJI", Font_16x26, NAVY, RED);
