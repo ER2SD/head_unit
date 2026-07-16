@@ -50,7 +50,7 @@ static inline void uint16_to_str(uint16_t val, char *buf, uint8_t maxlen)
 
 static inline void draw_team_name(uint8_t idx, uint16_t color)
 {
-	snprintf(scope_buf, sizeof(scope_buf), "team nr-%u", idx + 1);
+	snprintf(scope_buf, sizeof(scope_buf), "Team %u", idx + 1);
 	ILI9341_WriteString(TEAM_LABEL_X, TEAM_START_Y + idx * TEAM_ROW_STEP, scope_buf, Font_11x18, color, MYFON);
 }
 
@@ -66,7 +66,7 @@ static inline void draw_team_zero(uint16_t color)
 }
 
 //============= координатная сетка =====================
-void The_coordinate_grid()
+void show_coordinate_grid()
 {
 	for (uint16_t z = 20; z < 240; z += 20)
 		ILI9341_Draw_Horizontal_Line(0, z, 320, WHITE);
@@ -99,14 +99,15 @@ void screen_menu()
 	screen = 0;
 	ILI9341_Fill_Screen(YELLOW);
 	ILI9341_Draw_Filled_Rectangle_Coord(10, 10, 310, 230, RED);
-	ILI9341_WriteString(90, 12, "MAIN MENU", Font_16x26, BLACK, RED);
-	ILI9341_Draw_Filled_Rectangle_Coord(20, 60, 150, 120, BLUE);
-	ILI9341_Draw_Filled_Rectangle_Coord(170, 60, 300, 120, BLUE);
+	ILI9341_WriteString(128, 12, "CMJI", Font_16x26, NAVY, RED);
+	ILI9341_Draw_Filled_Rectangle_Coord(20, 60, 100, 120, BLUE); // old 20, 60, 150, 120
+	ILI9341_Draw_Filled_Rectangle_Coord(120, 60, 200, 120, BLUE);
+	ILI9341_Draw_Filled_Rectangle_Coord(220, 60, 300, 120, BLUE); // old 170, 60, 300, 120
 	ILI9341_Draw_Filled_Rectangle_Coord(20, 150, 300, 210, BLUE);
-	ILI9341_WriteString(30, 80, "Brain Ring", Font_11x18, ORANGE, BLUE);
-	ILI9341_WriteString(203, 70, "Erudit", Font_11x18, ORANGE, BLUE);
-	ILI9341_WriteString(195, 90, "Quartet", Font_11x18, ORANGE, BLUE);
-	ILI9341_WriteString(100, 165, "Setting", Font_16x26, ORANGE, BLUE);
+	ILI9341_WriteString(32, 82, "Brain", Font_11x18, ORANGE, BLUE);
+	ILI9341_WriteString(128, 82, "Simple", Font_11x18, ORANGE, BLUE);
+	ILI9341_WriteString(228, 82, "Erudit", Font_11x18, ORANGE, BLUE);
+	ILI9341_WriteString(100, 167, "Settings", Font_16x26, ORANGE, BLUE);
 }
 
 //================== экран Brain Ring ==================
@@ -114,9 +115,9 @@ void screen_Brain_Ring(void)
 {
 	ILI9341_Fill_Screen(YELLOW);
 	ILI9341_Draw_Filled_Rectangle_Coord(5, 5, 315, 235, MYFON);
-	ILI9341_WriteString(20, 10, "Brain_Ring", Font_11x18, OLIVE, MYFON);
-	ILI9341_WriteString(228, 10, "Timer:", Font_7x10, BLUE, MYFON);
-	ILI9341_WriteString(120, 36, "scores", Font_7x10, BLUE, MYFON);
+	ILI9341_WriteString(20, 10, "Brain Ring", Font_11x18, OLIVE, MYFON);
+	ILI9341_WriteString(230, 10, "Timer", Font_7x10, BLUE, MYFON);
+	ILI9341_WriteString(122, 36, "Score", Font_7x10, BLUE, MYFON);
 	ILI9341_WriteString(175, 38, "FS", Font_7x10, RED, MYFON);
 	ILI9341_Draw_Filled_Rectangle_Coord(20, 220, 60, 240, WHITE);
 	ILI9341_Draw_Filled_Rectangle_Coord(130, 220, 190, 240, WHITE);
@@ -139,6 +140,17 @@ void screen_Brain_Ring(void)
 	ILI9341_Random_line(302, 16, 315, 4, WHITE);
 }
 
+//================== Simple ====================
+void screen_Simple(void)
+{
+	ILI9341_Fill_Screen(YELLOW);
+	ILI9341_Draw_Filled_Rectangle_Coord(10, 10, 310, 230, RED);
+	ILI9341_WriteString(50, 12, "Simple", Font_16x26, BLACK, RED);
+	ILI9341_Draw_Filled_Rectangle_Coord(299, 1, 319, 21, BLACK);
+	ILI9341_Random_line(302, 4, 315, 16, WHITE);
+	ILI9341_Random_line(302, 16, 315, 4, WHITE);
+}
+
 //================== эрудит квартет ====================
 void screen_Erudit_Quartet(void)
 {
@@ -155,7 +167,8 @@ void screen_setting(void)
 {
 	ILI9341_Fill_Screen(YELLOW);
 	ILI9341_Draw_Filled_Rectangle_Coord(10, 10, 310, 230, RED);
-	ILI9341_WriteString(20, 20, "Brain Ring", Font_11x18, BLACK, RED);
+	ILI9341_WriteString(50, 15, "Brain &", Font_11x18, BLACK, RED);
+	ILI9341_WriteString(50, 35, "Simple", Font_11x18, BLACK, RED);
 	ILI9341_WriteString(200, 15, "Erudit", Font_11x18, BLACK, RED);
 	ILI9341_WriteString(200, 35, "Quartet", Font_11x18, BLACK, RED);
 	ILI9341_Draw_Vertical_Line(160, 0, 240, YELLOW);

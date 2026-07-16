@@ -25,3 +25,4 @@ Release/
 # !*.ioc
 
 datasheet
+*.launch
