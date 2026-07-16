@@ -154,7 +154,7 @@ void Touchscreen_handler(void)
 
 		switch (screen)
 		{
-		case 0:
+		case MAIN_MENU:
 			if (x > 20 && x < 100 && y > 60 && y < 120) // Brain Ring selected
 			{
 				//>>>>>>>>>>Сбрасываем очки у всех команд
@@ -167,17 +167,20 @@ void Touchscreen_handler(void)
 				timer_running = 0;						//флаг остановки таймера
 				HAL_TIM_Base_Stop_IT(&htim2);	//Останавливаем таймер
 				screen_Brain_Ring();					//переходим в экран игры "Брэйринг"
-				screen = 1;											//устанавливаем переменную для страктуры "switch(screen)"
+				screen = BRAIN_RING;					//устанавливаем переменную для страктуры "switch(screen)"
+				break;
 			}
 			else if (x > 120 && x < 200 && y > 60 && y < 120) // Simple selected
 			{
 				screen_Simple();
-				screen = 2;
+				screen = SIMPLE;
+				break;
 			}
 			else if (x > 220 && x < 300 && y > 60 && y < 120) // Erudit Quartet selected
 			{
 				screen_Erudit_Quartet();
-				screen = 3;
+				screen = ERUDIT;
+				break;
 			}
 			else if (x > 20 && x < 300 && y > 150 && y < 210) // если нажали Settings
 			{
@@ -199,11 +202,11 @@ void Touchscreen_handler(void)
 					ILI9341_WriteString(40, 80, "ON", Font_11x18, DARKGREY, RED);
 					ILI9341_WriteString(100, 80, "OFF", Font_11x18, GREEN, RED);
 				}
-				screen = 4;
+				screen = SETTINGS;
+				break;
 			}
-			break;
 			//-----------------------------------------------------------------------------------------------------------------------------------
-		case 1:
+		case BRAIN_RING:
 			enable_score_editing(); //редактирование результата
 			if (falstart_enabled)
 			{
@@ -212,19 +215,19 @@ void Touchscreen_handler(void)
 			if (x > 300 && x < 320 && y > 0 && y < 20) //если нажали крестик
 			{
 				screen_menu();
-				screen = 0;
+				screen = MAIN_MENU;
 			}
 			break;
 			//-----------------------------------------------------------------------------------------------------------------------------------
-		case 2:
+		case SIMPLE:
 			if (x > 300 && x < 320 && y > 0 && y < 20) //если нажали крестик
 			{
 				screen_menu();
-				screen = 0;
+				screen = MAIN_MENU;
 			}
 			break;
 			//-----------------------------------------------------------------------------------------------------------------------------------
-		case 3: //=============="setting"=================
+		case SETTINGS: 	//=============="setting"=================
 			if (x > 300 && x < 320 && y > 0 && y < 20) // если нажали крестик
 			{
 				screen_menu();
@@ -263,13 +266,11 @@ void Touchscreen_handler(void)
 			else if (x > 30 && x < 140 && y > 190 && y < 220) //обработчик кнопки "save"
 			{
 				screen_menu();
-				screen = 0;
+				screen = MAIN_MENU;
+				break;
 			}
-			break;
 			//-----------------------------------------------------------------------------------------------------------------------------------
-		case 4:
 
-			break;
 		default:
 			//Тут пишем код который не попал ни под один "case"
 			return;
