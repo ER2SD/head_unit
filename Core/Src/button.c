@@ -97,7 +97,7 @@ uint8_t Button_Read_right(void)
 }
 //=======Обработчик кнопок передатчиков===============
 static const char *const team_names[] =
-{ "team nr-1", "team nr-2", "team nr-3", "team nr-4", "team nr-5", "team nr-6", "team nr-7", "team nr-8" };
+{ "Team 1", "Team 2", "Team 3", "Team 4", "Team 5", "Team 6", "Team 7", "Team 8" };
 static const uint16_t team_y_pos[] =
 { 50, 70, 90, 110, 130, 150, 170, 190 };
 
@@ -130,7 +130,7 @@ void Button_Press_handler(void)
 			{
 				ILI9341_Draw_Filled_Rectangle_Coord(220, 80, 280, 120, WHITE);
 				ILI9341_WriteString(233, 90, "RESET", Font_7x10, BLACK, WHITE);
-				ILI9341_WriteString(230, 105, "TIMER", Font_7x10, BLACK, WHITE);
+				ILI9341_WriteString(232, 105, "TIMER", Font_7x10, BLACK, WHITE);
 			}
 		}
 		HAL_TIM_Base_Stop_IT(&htim2);
@@ -155,7 +155,7 @@ void Touchscreen_handler(void)
 		switch (screen)
 		{
 		case 0:
-			if (x > 20 && x < 150 && y > 60 && y < 120) //если нажали брейн-ринг
+			if (x > 20 && x < 100 && y > 60 && y < 120) // Brain Ring selected
 			{
 				//>>>>>>>>>>Сбрасываем очки у всех команд
 				for (uint8_t i = 0; i < 8; i++)
@@ -169,12 +169,17 @@ void Touchscreen_handler(void)
 				screen_Brain_Ring();					//переходим в экран игры "Брэйринг"
 				screen = 1;											//устанавливаем переменную для страктуры "switch(screen)"
 			}
-			else if (x > 170 && x < 300 && y > 60 && y < 120) // если нажали Эрудит квартет
+			else if (x > 120 && x < 200 && y > 60 && y < 120) // Simple selected
 			{
-				screen_Erudit_Quartet();
+				screen_Simple();
 				screen = 2;
 			}
-			else if (x > 20 && x < 300 && y > 150 && y < 210) // если нажали setting
+			else if (x > 220 && x < 300 && y > 60 && y < 120) // Erudit Quartet selected
+			{
+				screen_Erudit_Quartet();
+				screen = 3;
+			}
+			else if (x > 20 && x < 300 && y > 150 && y < 210) // если нажали Settings
 			{
 				screen_setting();
 				//>>>>>>>>>>Блок сохранения количесва команд в игре
@@ -194,7 +199,7 @@ void Touchscreen_handler(void)
 					ILI9341_WriteString(40, 80, "ON", Font_11x18, DARKGREY, RED);
 					ILI9341_WriteString(100, 80, "OFF", Font_11x18, GREEN, RED);
 				}
-				screen = 3;
+				screen = 4;
 			}
 			break;
 			//-----------------------------------------------------------------------------------------------------------------------------------

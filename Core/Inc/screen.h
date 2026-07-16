@@ -6,7 +6,8 @@
 void Touchscreen_handler();
 void screen_menu();
 void screen_Brain_Ring();
-void The_coordinate_grid();
+void show_coordinate_grid();
+void screen_Simple();
 void screen_Erudit_Quartet();
 void screen_setting();
 void tournament_table();

@@ -195,7 +195,7 @@ int main(void)
 				reset_color();											//установка цвета комманд для сделующего вопроса.
 				reset_falsstart();
 			}
-			else if (Button_Read_left() && screen == 3)
+			else if (Button_Read_left() && screen == 4)
 			{
 				//Код для экрана "эрудит"
 			}
@@ -209,7 +209,7 @@ int main(void)
 				//ILI9341_WriteString(230, 25, lcd_buf, Font_16x26, RED, MYFON); // вывод показаний таймера
 				button_event_handler();							//Если ответ не верный-команда выбывает (цвет надписи команды чёрный)
 			}
-			else if (Button_Read_left() && screen == 3)
+			else if (Button_Read_left() && screen == 4)
 			{
 				//Код для экрана "эрудит"
 			}
@@ -218,7 +218,7 @@ int main(void)
 				timer_running = 1;
 				HAL_TIM_Base_Start_IT(&htim2);
 			}
-			else if (Button_Read_left() && screen == 3)
+			else if (Button_Read_left() && screen == 4)
 			{
 				//Код для экрана "эрудит"
 			}
