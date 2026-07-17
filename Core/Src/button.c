@@ -34,7 +34,7 @@ extern uint16_t teams_fs_state[8];          // Teams false start state
 extern uint16_t answer;											//положительный или отрицательный ответ
 
 // macros to check the coordinates in range
-#define IS_WITHIN(x, y, x1, y1, x2, y2) (((x) > (x1)) && ((x) < (x2)) && ((y) > (y1)) && ((y) < (y2)))
+#define IS_WITHIN(x, y, x1, y1, x2, y2) ((x) > (x1)) && ((x) < (x2)) && ((y) > (y1)) && ((y) < (y2))
 
 static const char *const team_digits[] =
 { "2", "3", "4", "5", "6", "7", "8" };
