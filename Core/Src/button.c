@@ -28,7 +28,8 @@ extern char buf[64];
 extern uint16_t scores[8];							//количество очков команд [0-7]
 
 extern volatile int g_timer_seconds;				//Начальное значение таймера
-extern volatile uint8_t reset_timer;		//старт/стоп таймера
+extern volatile uint8_t reset_timer;				//старт/стоп таймера
+extern volatile uint8_t touch_irq_active;
 extern uint16_t teams;									//номер команды
 extern uint16_t answer;											//положительный или отрицательный ответ
 
@@ -142,11 +143,16 @@ void Button_Press_handler(void)
 }
 void Touchscreen_handler(void)
 {
-	if (HAL_GPIO_ReadPin(GPIOB, T_IRQ_Pin) == GPIO_PIN_RESET && flag_press) //если нажат тачскрин
+	if (touch_irq_active  && flag_press) //если нажат тачскрин
 	{
 		x = 0;
 		y = 0;
-		if (ILI9341_TouchGetCoordinates(&x, &y))
+		if ( !ILI9341_TouchGetCoordinates(&x, &y)) {
+			return;
+		}
+
+		/*
+		if ( ILI9341_TouchGetCoordinates(&x, &y))
 		{
 			flag_press = 0;
 			//>>>>>>>>>>вывод координат в UART для отладки
@@ -155,7 +161,7 @@ void Touchscreen_handler(void)
 			buf[strlen(buf) - 1] = '\0';
 			//ILI9341_WriteString(10, 120, buf, Font_11x18, WHITE, MYFON);//вывод координат на экран для отладки
 		}
-
+		*/
 		switch (screen)
 		{
 		case MAIN_MENU:
@@ -235,7 +241,7 @@ void Touchscreen_handler(void)
 			if (IS_WITHIN(x, y, 300, 0, 320, 20)) // если нажали крестик
 			{
 				screen_menu();
-				screen = 0;
+				screen = MAIN_MENU;
 			}
             else if (IS_WITHIN(x, y, 40, 80, 60, 100)) //Фальшстарт ON
 			{

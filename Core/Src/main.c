@@ -64,10 +64,11 @@ UART_HandleTypeDef huart2;
 char str1[64] =
 { 0 };
 volatile int g_timer_seconds = 60;				//Начальное значение таймера
-volatile uint8_t reset_timer = 0;	//старт/стоп таймера
-uint8_t timer_running = 0;   			//0 = стоп, 1 = работает
-uint8_t btn_prev = 1;        			//предыдущее состояние кнопки
-char lcd_buf[16];									//буфер значения таймера
+volatile uint8_t reset_timer = 0;				//старт/стоп таймера
+volatile uint8_t touch_irq_active = 0;			//toch active
+uint8_t timer_running = 0;   					//0 = стоп, 1 = работает
+uint8_t btn_prev = 1;        					//предыдущее состояние кнопки
+char lcd_buf[16];								//буфер значения таймера
 uint16_t teams = 2;								//номер команды
 uint16_t pressed_btn_team = 0;								//номер нажатой кнопки команды
 uint16_t scores[8] =
@@ -694,6 +695,14 @@ static void MX_GPIO_Init(void)
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
 	HAL_GPIO_Init(T_CS_GPIO_Port, &GPIO_InitStruct);
+
+	/* configure T_IRQ pin as EXTI interrupt */
+	GPIO_InitStruct.Pin = T_IRQ_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+	GPIO_InitStruct.Pull = GPIO_PULLUP;
+	HAL_GPIO_Init(T_IRQ_GPIO_Port, &GPIO_InitStruct);
+	HAL_NVIC_SetPriority(EXTI15_10_IRQn, 3, 0);
+	HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 	/*Configure GPIO pins : DC_Pin CS_Pin RESET_Pin */
 	GPIO_InitStruct.Pin = DC_Pin | CS_Pin | RESET_Pin;

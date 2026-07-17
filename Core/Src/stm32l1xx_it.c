@@ -56,6 +56,7 @@
 
 /* External variables --------------------------------------------------------*/
 extern TIM_HandleTypeDef htim2;
+extern volatile uint8_t touch_irq_active;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -213,5 +214,12 @@ void TIM2_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+
+void EXTI15_10_IRQHandler(void){
+    if(__HAL_GPIO_EXTI_GET_IT(T_IRQ_Pin) != RESET) {
+      touch_irq_active = 1;
+      __HAL_GPIO_EXTI_CLEAR_IT(T_IRQ_Pin);
+    }
+}
 
 /* USER CODE END 1 */

@@ -143,7 +143,7 @@ void screen_Brain_Ring(void)
 //================== Simple ====================
 void screen_Simple(void)
 {
-	ILI9341_Fill_Screen(YELLOW);
+	//ILI9341_Fill_Screen(YELLOW);
 	ILI9341_Draw_Filled_Rectangle_Coord(10, 10, 310, 230, RED);
 	ILI9341_WriteString(50, 12, "Simple", Font_16x26, BLACK, RED);
 	ILI9341_Draw_Filled_Rectangle_Coord(299, 1, 319, 21, BLACK);
