@@ -200,17 +200,18 @@ void button_event_handler(void)
 {
 	if (pressed_btn_team < 1 || pressed_btn_team > MAX_TEAMS)
 		return;
+
 	uint8_t idx = pressed_btn_team - 1;
-
-	uint16_to_str(scores[idx], scope_buf, sizeof(scope_buf));
-	ILI9341_WriteString(TEAM_SCORE_X, TEAM_START_Y + idx * TEAM_ROW_STEP, scope_buf, Font_11x18, WHITE, MYFON);
-
-	draw_team_name(idx, (answer == 0) ? BLACK : WHITE);
 
 	if (answer == 1)
 	{
 		scores[idx]++;
 	}
+
+	uint16_to_str(scores[idx], scope_buf, sizeof(scope_buf));
+	ILI9341_WriteString(TEAM_SCORE_X, TEAM_START_Y + idx * TEAM_ROW_STEP, scope_buf, Font_11x18, WHITE, MYFON);
+
+	draw_team_name(idx, (answer == 0) ? BLACK : WHITE);
 }
 
 //>>>>>>>>>>функция окрашивает все надписи комманд в цвет по умолчанию
@@ -223,7 +224,7 @@ void base_setting_color(void)
 }
 
 //>>>>>>>>>>фунция сброса фальшстарта
-void reset_falsstart(void)
+void Reset_falstart_screen(void)
 {
 	for (uint8_t i = 0; i < MAX_TEAMS; i++)
 		ILI9341_WriteString(175, TEAM_START_Y + 2 + i * TEAM_ROW_STEP, " ", Font_11x18, RED, MYFON);

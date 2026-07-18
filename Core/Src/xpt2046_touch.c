@@ -190,6 +190,8 @@ void hide_reset_timer_button(void)
 		g_timer_seconds = 60;
 		reset_timer = 1;
 		timer_running = 0;
+		Reset_falstart_state();
+		Reset_falstart_screen();
 		HAL_TIM_Base_Stop_IT(&htim2);
 	}
 }

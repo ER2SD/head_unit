@@ -113,6 +113,12 @@ void Show_reset_timer_button(void)
 	ILI9341_WriteString(232, 105, "TIMER", Font_7x10, BLACK, WHITE);
 }
 
+void Reset_falstart_state(void)
+{
+	for (uint8_t i = 0; i < 8; i++)
+		teams_fs_state[i] = 0;
+}
+
 void NRF_Event_handler(void)
 {
 	uint8_t status;
@@ -127,26 +133,27 @@ void NRF_Event_handler(void)
 	{
 	case BRAIN_RING:
 		rx_data = NRF24L01_Receive();
-		if (rx_data < 0x01 || rx_data > 0x08)
+		if (pressed_btn_team || rx_data < 0x01 || rx_data > 0x08)
 		{
 			return;
 		}
 		uint8_t team_idx = rx_data - 1;
 		uint8_t is_false_start = (falstart_enabled && timer_running == 0);
 
-		pressed_btn_team = rx_data;
-
 		if (is_false_start)
 		{
 			ILI9341_WriteString(7, team_y_pos[team_idx], team_names[team_idx], Font_11x18, BLACK, MYFON);
 			ILI9341_WriteString(175, team_y_pos[team_idx] + 2, "!", Font_11x18, RED, MYFON);
+
+			teams_fs_state[team_idx] = 1;
 			Show_reset_timer_button();
 		}
-		else
+		else if (!teams_fs_state[team_idx])
 		{
+			pressed_btn_team = rx_data;
 			ILI9341_WriteString(7, team_y_pos[team_idx], team_names[team_idx], Font_11x18, YELLOW, MYFON);
+			HAL_TIM_Base_Stop_IT(&htim2);
 		}
-		HAL_TIM_Base_Stop_IT(&htim2);
 		break;
 	case SIMPLE:
 		break;
@@ -154,31 +161,6 @@ void NRF_Event_handler(void)
 		break;
 	default:
 		return;
-	}
-
-	if (status & 0x40 && screen == BRAIN_RING)
-	{
-
-		rx_data = NRF24L01_Receive();
-		if (rx_data >= 0x01 && rx_data <= 0x08)
-		{
-			uint8_t team_idx = rx_data - 1;
-			uint8_t is_false_start = (falstart_enabled && timer_running == 0);
-
-			pressed_btn_team = rx_data;
-
-			if (is_false_start)
-			{
-				ILI9341_WriteString(7, team_y_pos[team_idx], team_names[team_idx], Font_11x18, BLACK, MYFON);
-				ILI9341_WriteString(175, team_y_pos[team_idx] + 2, "!", Font_11x18, RED, MYFON);
-				Show_reset_timer_button();
-			}
-			else
-			{
-				ILI9341_WriteString(7, team_y_pos[team_idx], team_names[team_idx], Font_11x18, YELLOW, MYFON);
-			}
-		}
-		HAL_TIM_Base_Stop_IT(&htim2);
 	}
 }
 
@@ -259,7 +241,6 @@ void Touchscreen_handler(void)
 			}
             if (IS_WITHIN(x, y, 300, 0, 320, 20)) //если нажали крестик
 			{
-				LED_OFF;
 				screen_menu();
 				screen = MAIN_MENU;
 			}

@@ -167,12 +167,14 @@ int main(void)
 		{
 			LED_TGL;
 			g_timer_seconds = 60;
-			timer_running = 0;																					//флаг остановки таймера
+			timer_running = 0;    			//флаг остановки таймера
+			pressed_btn_team = 0;
 			HAL_TIM_Base_Stop_IT(&htim2);																		//Останавливаем таймер
 			sprintf(lcd_buf, "%02d ", g_timer_seconds);
 			ILI9341_WriteString(230, 25, lcd_buf, Font_16x26, RED, MYFON); 	// вывод показаний таймера
-			reset_color();																//установка цвета комманд для сделующего вопроса.
-			reset_falsstart();																						//сброс фальшстарта
+			reset_color();												//установка цвета комманд для сделующего вопроса.
+			Reset_falstart_state();
+			Reset_falstart_screen();																						//сброс фальшстарта
 		}
 		NRF_Event_handler(); 										//Обработчик сигналов с кнопок передатчиков
 		Touchscreen_handler();						//Обработчик тачскрина
@@ -191,11 +193,12 @@ int main(void)
 				timer_running = 0;
 				g_timer_seconds = 60; 											//Устанавливаем начальное время
 				reset_timer = 1;										//Сброс таймера
-				pressed_btn_team = rx_data;											//Фиксируем номер команды нажавшая кнопку
 				answer = 1;																//Положительный или отрицательный ответ
 				button_event_handler();							//Если ответ не верный-команда выбывает (цвет надписи команды чёрный)
 				reset_color();											//установка цвета комманд для сделующего вопроса.
-				reset_falsstart();
+				Reset_falstart_state();
+				Reset_falstart_screen();
+				pressed_btn_team = 0;
 			}
 			else if (Button_Read_left() && screen == ERUDIT)
 			{
@@ -204,12 +207,12 @@ int main(void)
 			if (Button_Read_right() && screen == BRAIN_RING && timer_running == 1)
 			{
 				timer_running = 0;
-				pressed_btn_team = rx_data;
 				answer = 0;
 				g_timer_seconds = 20; 											//Устанавливаем начальное время
 				reset_timer = 1;										//Сброс таймера
 				//ILI9341_WriteString(230, 25, lcd_buf, Font_16x26, RED, MYFON); // вывод показаний таймера
 				button_event_handler();							//Если ответ не верный-команда выбывает (цвет надписи команды чёрный)
+				pressed_btn_team = 0;
 			}
 			else if (Button_Read_left() && screen == ERUDIT)
 			{
@@ -218,6 +221,7 @@ int main(void)
 			if (Button_Read_center() && screen == BRAIN_RING)
 			{
 				timer_running = 1;
+				pressed_btn_team = 0;
 				HAL_TIM_Base_Start_IT(&htim2);
 			}
 			else if (Button_Read_left() && screen == ERUDIT)

@@ -216,6 +216,6 @@ void NRF24_PrintReg(char *name, uint8_t reg)
 void Blink_LED(void)
 {
 	LED_ON;
-	HAL_Delay(500);   // on for 1/2 second
+	HAL_Delay(200);
 	LED_OFF;
 }
