@@ -30,6 +30,7 @@ extern uint16_t scores[8];							//количество очков команд 
 extern volatile int g_timer_seconds;				//Начальное значение таймера
 extern volatile uint8_t reset_timer;		//старт/стоп таймера
 extern uint16_t teams;									//номер команды
+extern uint16_t teams_answer_state[8];          // Teams answer state
 extern uint16_t teams_fs_state[8];          // Teams false start state
 extern uint16_t answer;											//положительный или отрицательный ответ
 
@@ -38,7 +39,6 @@ extern uint16_t answer;											//положительный или отриц
 
 static const char *const team_digits[] =
 { "2", "3", "4", "5", "6", "7", "8" };
-static uint32_t last_ui_update = 0;
 
 extern TIM_HandleTypeDef htim2;
 extern UART_HandleTypeDef huart1;
@@ -113,6 +113,12 @@ void Show_reset_timer_button(void)
 	ILI9341_WriteString(232, 105, "TIMER", Font_7x10, BLACK, WHITE);
 }
 
+void Reset_answer_state(void)
+{
+	for (uint8_t i = 0; i < 8; i++)
+		teams_answer_state[i] = 0;
+}
+
 void Reset_falstart_state(void)
 {
 	for (uint8_t i = 0; i < 8; i++)
@@ -133,12 +139,17 @@ void NRF_Event_handler(void)
 	{
 	case BRAIN_RING:
 		rx_data = NRF24L01_Receive();
-		if (pressed_btn_team || rx_data < 0x01 || rx_data > 0x08)
+		if (rx_data < 0x01 || rx_data > 0x08)
 		{
 			return;
 		}
+
 		uint8_t team_idx = rx_data - 1;
 		uint8_t is_false_start = (falstart_enabled && timer_running == 0);
+		if (pressed_btn_team || teams_answer_state[team_idx])
+		{
+			return;
+		}
 
 		if (is_false_start)
 		{
@@ -151,6 +162,7 @@ void NRF_Event_handler(void)
 		else if (!teams_fs_state[team_idx])
 		{
 			pressed_btn_team = rx_data;
+			teams_answer_state[team_idx] = 1;
 			ILI9341_WriteString(7, team_y_pos[team_idx], team_names[team_idx], Font_11x18, YELLOW, MYFON);
 			HAL_TIM_Base_Stop_IT(&htim2);
 		}

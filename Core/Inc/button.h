@@ -17,6 +17,7 @@ uint8_t Button_Read_left(void);
 uint8_t Button_Read_center(void);
 uint8_t Button_Read_right(void);
 void Show_reset_timer_button(void);
+void Reset_answer_state(void);
 void Reset_falstart_state(void);
 void NRF_Event_handler(void);
 void Touchscreen_handler(void);
