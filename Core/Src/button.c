@@ -146,7 +146,7 @@ void NRF_Event_handler(void)
 
 		uint8_t team_idx = rx_data - 1;
 		uint8_t is_false_start = (falstart_enabled && timer_running == 0);
-		if (pressed_btn_team || teams_answer_state[team_idx])
+		if (pressed_btn_team || teams_answer_state[team_idx] || team_idx >= teams)
 		{
 			return;
 		}

@@ -713,7 +713,7 @@ void Left_button_handler(void)
 	switch (screen)
 	{
 		case BRAIN_RING:
-			if (!timer_running)
+			if (!timer_running || !pressed_btn_team)
 			{
 				return;
 			}
@@ -762,7 +762,7 @@ void Right_button_handler(void)
 	switch (screen)
 	{
 		case BRAIN_RING:
-			if (!timer_running)
+			if (!timer_running || !pressed_btn_team)
 			{
 				return;
 			}
