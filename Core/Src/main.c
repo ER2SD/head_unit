@@ -69,6 +69,8 @@ uint8_t timer_running = 0;   			//0 = стоп, 1 = работает
 uint8_t btn_prev = 1;        			//предыдущее состояние кнопки
 char lcd_buf[16];									//буфер значения таймера
 uint16_t teams = 2;								//номер команды
+uint16_t teams_answer_state[8] =
+{ 0 };								// Teams answer state
 uint16_t teams_fs_state[8] =
 { 0 };								// Teams false start state
 uint16_t pressed_btn_team = 0;								//номер нажатой кнопки команды
@@ -99,6 +101,10 @@ static void MX_USART2_UART_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
+
+void Left_button_handler(void);
+void Center_button_handler(void);
+void Right_button_handler(void);
 
 /* USER CODE END PFP */
 
@@ -173,6 +179,7 @@ int main(void)
 			sprintf(lcd_buf, "%02d ", g_timer_seconds);
 			ILI9341_WriteString(230, 25, lcd_buf, Font_16x26, RED, MYFON); 	// вывод показаний таймера
 			reset_color();												//установка цвета комманд для сделующего вопроса.
+			Reset_answer_state();
 			Reset_falstart_state();
 			Reset_falstart_screen();																						//сброс фальшстарта
 		}
@@ -186,47 +193,19 @@ int main(void)
 		}
 		else
 		{
+			if (Button_Read_left())
+			{
+				Left_button_handler();
+			}
 
-			if (Button_Read_left() && screen == BRAIN_RING && timer_running == 1)
+			if (Button_Read_center())
 			{
-				//обработка состояния таймера
-				timer_running = 0;
-				g_timer_seconds = 60; 											//Устанавливаем начальное время
-				reset_timer = 1;										//Сброс таймера
-				answer = 1;																//Положительный или отрицательный ответ
-				button_event_handler();							//Если ответ не верный-команда выбывает (цвет надписи команды чёрный)
-				reset_color();											//установка цвета комманд для сделующего вопроса.
-				Reset_falstart_state();
-				Reset_falstart_screen();
-				pressed_btn_team = 0;
+				Center_button_handler();
 			}
-			else if (Button_Read_left() && screen == ERUDIT)
+
+			if (Button_Read_right())
 			{
-				//Код для экрана "эрудит"
-			}
-			if (Button_Read_right() && screen == BRAIN_RING && timer_running == 1)
-			{
-				timer_running = 0;
-				answer = 0;
-				g_timer_seconds = 20; 											//Устанавливаем начальное время
-				reset_timer = 1;										//Сброс таймера
-				//ILI9341_WriteString(230, 25, lcd_buf, Font_16x26, RED, MYFON); // вывод показаний таймера
-				button_event_handler();							//Если ответ не верный-команда выбывает (цвет надписи команды чёрный)
-				pressed_btn_team = 0;
-			}
-			else if (Button_Read_left() && screen == ERUDIT)
-			{
-				//Код для экрана "эрудит"
-			}
-			if (Button_Read_center() && screen == BRAIN_RING)
-			{
-				timer_running = 1;
-				pressed_btn_team = 0;
-				HAL_TIM_Base_Start_IT(&htim2);
-			}
-			else if (Button_Read_left() && screen == ERUDIT)
-			{
-				//Код для экрана "эрудит"
+				Right_button_handler();
 			}
 		}
 
@@ -728,6 +707,83 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+void Left_button_handler(void)
+{
+	switch (screen)
+	{
+		case BRAIN_RING:
+			if (!timer_running || !pressed_btn_team)
+			{
+				return;
+			}
+
+			//обработка состояния таймера
+			timer_running = 0;
+			g_timer_seconds = 60; 											//Устанавливаем начальное время
+			reset_timer = 1;										//Сброс таймера
+			answer = 1;																//Положительный или отрицательный ответ
+			button_event_handler();							//Если ответ не верный-команда выбывает (цвет надписи команды чёрный)
+			reset_color();											//установка цвета комманд для сделующего вопроса.
+			Reset_answer_state();
+			Reset_falstart_state();
+			Reset_falstart_screen();
+			pressed_btn_team = 0;
+			break;
+		case SIMPLE:
+			break;
+		case ERUDIT:
+			break;
+		default:
+			return;
+	}
+}
+
+void Center_button_handler(void)
+{
+	switch (screen)
+	{
+		case BRAIN_RING:
+			timer_running = 1;
+			pressed_btn_team = 0;
+			HAL_TIM_Base_Start_IT(&htim2);
+			break;
+		case SIMPLE:
+			break;
+		case ERUDIT:
+			break;
+		default:
+			return;
+	}
+}
+
+void Right_button_handler(void)
+{
+	switch (screen)
+	{
+		case BRAIN_RING:
+			if (!timer_running || !pressed_btn_team)
+			{
+				return;
+			}
+
+			timer_running = 0;
+			answer = 0;
+			g_timer_seconds = 20; 											//Устанавливаем начальное время
+			reset_timer = 1;										//Сброс таймера
+			//ILI9341_WriteString(230, 25, lcd_buf, Font_16x26, RED, MYFON); // вывод показаний таймера
+			button_event_handler();							//Если ответ не верный-команда выбывает (цвет надписи команды чёрный)
+			pressed_btn_team = 0;
+			break;
+		case SIMPLE:
+			break;
+		case ERUDIT:
+			break;
+		default:
+			return;
+	}
+}
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if (htim->Instance == TIM2)
