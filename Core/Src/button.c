@@ -159,7 +159,7 @@ void NRF_Event_handler(void)
 			teams_fs_state[team_idx] = 1;
 			Show_reset_timer_button();
 		}
-		else if (!teams_fs_state[team_idx])
+		else if (!teams_fs_state[team_idx] && timer_running)
 		{
 			pressed_btn_team = rx_data;
 			teams_answer_state[team_idx] = 1;
