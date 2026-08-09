@@ -139,8 +139,24 @@ void screen_Brain_Ring(void)
 void screen_Simple(void)
 {
 	ILI9341_Fill_Screen(YELLOW);
-	ILI9341_Draw_Filled_Rectangle_Coord(10, 10, 310, 230, RED);
-	ILI9341_WriteString(50, 12, "Simple", Font_16x26, BLACK, RED);
+
+	ILI9341_Draw_Filled_Rectangle_Coord(5, 5, 315, 235, MYFON);
+	ILI9341_WriteString(20, 10, "Simple", Font_11x18, OLIVE, MYFON);
+	ILI9341_WriteString(122, 36, "Score", Font_7x10, BLUE, MYFON);
+	ILI9341_Draw_Filled_Rectangle_Coord(20, 220, 60, 240, WHITE);
+	ILI9341_Draw_Filled_Rectangle_Coord(130, 220, 190, 240, WHITE);
+	ILI9341_Draw_Filled_Rectangle_Coord(260, 220, 300, 240, WHITE);
+	ILI9341_WriteString(30, 225, "Yes", Font_7x10, BLUE, WHITE);
+	ILI9341_WriteString(272, 225, "No", Font_7x10, BLUE, WHITE);
+	tournament_table();
+
+	for (uint8_t i = 0; i < MAX_TEAMS; i++)
+	{
+		uint16_t color = (i < teams) ? WHITE : BLACK;
+		draw_team_name(i, color);
+		draw_team_score(i, color);
+	}
+
 	ILI9341_Draw_Filled_Rectangle_Coord(299, 1, 319, 21, BLACK);
 	ILI9341_Random_line(302, 4, 315, 16, WHITE);
 	ILI9341_Random_line(302, 16, 315, 4, WHITE);

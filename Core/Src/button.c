@@ -69,68 +69,66 @@ uint8_t Button_Read_left(void)
 //======= Center button handler KEY2==================
 uint8_t Button_Read_center(void)
 {
-    typedef enum {
-        BTN_IDLE,
-        BTN_DEBOUNCE,
-        BTN_PRESSED,
-        BTN_LONG_HELD
-    } BTN_State_t;
+	typedef enum
+	{
+		BTN_IDLE, BTN_DEBOUNCE, BTN_PRESSED, BTN_LONG_HELD
+	} BTN_State_t;
 
-    static BTN_State_t state = BTN_IDLE;
-    static uint32_t timer = 0;
+	static BTN_State_t state = BTN_IDLE;
+	static uint32_t timer = 0;
 
-    uint32_t now = HAL_GetTick();
-    uint8_t is_pressed = (HAL_GPIO_ReadPin(BUTTON_PORT, BUTTON_PIN_CENTER) == BUTTON_PRESSED_LEVEL);
+	uint32_t now = HAL_GetTick();
+	uint8_t is_pressed = (HAL_GPIO_ReadPin(BUTTON_PORT, BUTTON_PIN_CENTER) == BUTTON_PRESSED_LEVEL);
 
-    switch (state)
-    {
-        case BTN_IDLE:
-            if (is_pressed)
-            {
-                timer = now;
-                state = BTN_DEBOUNCE;
-            }
-            break;
+	switch (state)
+	{
+	case BTN_IDLE:
+		if (is_pressed)
+		{
+			timer = now;
+			state = BTN_DEBOUNCE;
+		}
+		break;
 
-        case BTN_DEBOUNCE:
-            if (!is_pressed)
-            {
-                // Contact bounce noise – ignore
-                state = BTN_IDLE;
-            }
-            else if ((now - timer) >= 30) // 30 ms debounce filter
-            {
-                // Valid press confirmed
-                timer = now;
-                state = BTN_PRESSED;
-            }
-            break;
+	case BTN_DEBOUNCE:
+		if (!is_pressed)
+		{
+			// Contact bounce noise – ignore
+			state = BTN_IDLE;
+		}
+		else if ((now - timer) >= 30) // 30 ms debounce filter
+		{
+			// Valid press confirmed
+			timer = now;
+			state = BTN_PRESSED;
+		}
+		break;
 
-        case BTN_PRESSED:
-            if (!is_pressed)
-            {
-                // Released before 1000 ms -> Short Press
-                state = BTN_IDLE;
-                return 1;
-            }
-            else if ((now - timer) >= 1000)
-            {
-                // Held for 1000 ms -> Long Press
-                state = BTN_LONG_HELD;
-                return 2;
-            }
-            break;
+	case BTN_PRESSED:
+		if (!is_pressed)
+		{
+			// Released before 1000 ms -> Short Press
+			state = BTN_IDLE;
+			return 1;
+		}
+		else if ((now - timer) >= 1000)
+		{
+			// Held for 1000 ms -> Long Press
+			state = BTN_LONG_HELD;
+			return 2;
+		}
+		break;
 
-        case BTN_LONG_HELD:
-            if (!is_pressed)
-            {
-                // Button finally released after long press
-                state = BTN_IDLE;
-            }
-            break;
-    }
+	case BTN_LONG_HELD:
+		if (!is_pressed)
+		{
+			// Button finally released after long press
+			state = BTN_IDLE;
+		}
+		break;
+	}
 
-    return 0; // No event
+	return 0; // No event
 }
 //=======Обработчик правой кнопки KEY3==================
 uint8_t Button_Read_right(void)
@@ -211,6 +209,21 @@ void NRF_Event_handler(void)
 		}
 		break;
 	case SIMPLE:
+		rx_data = NRF24L01_Receive();
+		if (rx_data < 0x01 || rx_data > 0x08)
+		{
+			return;
+		}
+
+		uint8_t idx = rx_data - 1;
+		if (pressed_btn_team || teams_answer_state[idx] || idx >= teams)
+		{
+			return;
+		}
+
+		pressed_btn_team = rx_data;
+		teams_answer_state[idx] = 1;
+		ILI9341_WriteString(7, team_y_pos[idx], team_names[idx], Font_11x18, YELLOW, MYFON);
 		break;
 	case ERUDIT:
 		break;
@@ -238,7 +251,7 @@ void Touchscreen_handler(void)
 		switch (screen)
 		{
 		case MAIN_MENU:
-            if (IS_WITHIN(x, y, 20, 60, 100, 120)) // Brain Ring selected
+			if (IS_WITHIN(x, y, 20, 60, 100, 120)) // Brain Ring selected
 			{
 				//>>>>>>>>>>Сбрасываем очки у всех команд
 				for (uint8_t i = 0; i < 8; i++)
@@ -246,24 +259,28 @@ void Touchscreen_handler(void)
 
 				Reset_state(0);
 
-				HAL_TIM_Base_Stop_IT(&htim2);	//Останавливаем таймер
-				screen_Brain_Ring();					//переходим в экран игры "Брэйринг"
-				screen = BRAIN_RING;					//устанавливаем переменную для страктуры "switch(screen)"
+				HAL_TIM_Base_Stop_IT(&htim2);
+				screen_Brain_Ring();
+				screen = BRAIN_RING;
 				break;
 			}
-            else if (IS_WITHIN(x, y, 120, 60, 200, 120)) // Simple selected
+			else if (IS_WITHIN(x, y, 120, 60, 200, 120)) // Simple selected
 			{
+				for (uint8_t i = 0; i < 8; i++)
+					scores[i] = 0;
+
+				Reset_state(0);
 				screen_Simple();
 				screen = SIMPLE;
 				break;
 			}
-            else if (IS_WITHIN(x, y, 220, 60, 300, 120)) // Erudit Quartet selected
+			else if (IS_WITHIN(x, y, 220, 60, 300, 120)) // Erudit Quartet selected
 			{
 				screen_Erudit_Quartet();
 				screen = ERUDIT;
 				break;
 			}
-            else if (IS_WITHIN(x, y, 20, 150, 300, 210)) // если нажали Settings
+			else if (IS_WITHIN(x, y, 20, 150, 300, 210)) // если нажали Settings
 			{
 				screen_setting();
 				//>>>>>>>>>>Блок сохранения количесва команд в игре
@@ -291,14 +308,15 @@ void Touchscreen_handler(void)
 			{
 				enable_score_editing(); //редактирование результата
 			}
-            if (IS_WITHIN(x, y, 300, 0, 320, 20)) //если нажали крестик
+			if (IS_WITHIN(x, y, 300, 0, 320, 20)) //если нажали крестик
 			{
 				screen_menu();
 				screen = MAIN_MENU;
 			}
 			break;
 		case SIMPLE:
-            if (IS_WITHIN(x, y, 300, 0, 320, 20)) //если нажали крестик
+			enable_score_editing();
+			if (IS_WITHIN(x, y, 300, 0, 320, 20)) //если нажали крестик
 			{
 				screen_menu();
 				screen = MAIN_MENU;
@@ -310,26 +328,26 @@ void Touchscreen_handler(void)
 				screen_menu();
 				screen = MAIN_MENU;
 			}
-			break;			
+			break;
 		case SETTINGS: 	//=============="setting"=================
 			if (IS_WITHIN(x, y, 300, 0, 320, 20)) // если нажали крестик
 			{
 				screen_menu();
 				screen = MAIN_MENU;
 			}
-            else if (IS_WITHIN(x, y, 40, 80, 60, 100)) //Фальшстарт ON
+			else if (IS_WITHIN(x, y, 40, 80, 60, 100)) //Фальшстарт ON
 			{
 				falstart_enabled = 1;
 				ILI9341_WriteString(40, 80, "ON", Font_11x18, GREEN, RED);
 				ILI9341_WriteString(100, 80, "OFF", Font_11x18, DARKGREY, RED);
 			}
-            else if (IS_WITHIN(x, y, 100, 80, 130, 100)) //Фальшстарт OFF
+			else if (IS_WITHIN(x, y, 100, 80, 130, 100)) //Фальшстарт OFF
 			{
 				falstart_enabled = 0;
 				ILI9341_WriteString(40, 80, "ON", Font_11x18, DARKGREY, RED);
 				ILI9341_WriteString(100, 80, "OFF", Font_11x18, GREEN, RED);
 			}
-            else if (IS_WITHIN(x, y, 30, 142, 68, 175)) //Если добавляем комманды "-"
+			else if (IS_WITHIN(x, y, 30, 142, 68, 175)) //Если добавляем комманды "-"
 			{
 				teams--;
 				if (teams >= 2 && teams <= 8)
@@ -338,7 +356,7 @@ void Touchscreen_handler(void)
 					HAL_Delay(500);
 				}
 			}
-            else if (IS_WITHIN(x, y, 90, 142, 128, 175)) //Если удаляем комманды "+"
+			else if (IS_WITHIN(x, y, 90, 142, 128, 175)) //Если удаляем комманды "+"
 			{
 				teams++;
 				if (teams >= 2 && teams <= 8)
@@ -347,7 +365,7 @@ void Touchscreen_handler(void)
 					HAL_Delay(500);
 				}
 			}
-            else if (IS_WITHIN(x, y, 30, 190, 140, 220)) //обработчик кнопки "save"
+			else if (IS_WITHIN(x, y, 30, 190, 140, 220)) //обработчик кнопки "save"
 			{
 				screen_menu();
 				screen = MAIN_MENU;

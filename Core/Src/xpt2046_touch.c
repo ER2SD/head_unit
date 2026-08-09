@@ -130,12 +130,21 @@ static void draw_edit_buttons(void)
 
 void enable_score_editing(void)
 {
-	for (uint8_t i = 0; i < MAX_TEAMS; i++)
+	for (uint8_t i = 0; i < teams; i++)
 	{
 		uint16_t y_top = EDIT_ZONE_START_Y + i * EDIT_ZONE_ROW_STEP;
 		uint16_t y_bot = y_top + EDIT_ZONE_ROW_STEP;
 		if (x > EDIT_ZONE_X_MIN && x < EDIT_ZONE_X_MAX && y > y_top && y < y_bot)
 		{
+			for (uint8_t j = 0; j < teams; j++)
+			{
+				if (j == i)
+					continue;
+				uint16_to_str(scores[j], scope_buf, sizeof(scope_buf));
+				uint16_t j_ytop = EDIT_ZONE_START_Y + j * EDIT_ZONE_ROW_STEP;
+				ILI9341_WriteString(135, j_ytop, scope_buf, Font_11x18, WHITE, MYFON);
+			}
+
 			edit_score = i + 1;
 			uint16_to_str(scores[i], scope_buf, sizeof(scope_buf));
 			ILI9341_WriteString(135, y_top, scope_buf, Font_11x18, ORANGE, MYFON);
@@ -152,7 +161,7 @@ void score_editing_handler(void)
 		return;
 	}
 
-	if (edit_score < 1 || edit_score > MAX_TEAMS)
+	if (edit_score < 1 || edit_score > teams)
 	{
 		return;
 	}
@@ -177,8 +186,13 @@ void score_editing_handler(void)
 
 	if (Button_Read_center() && edit_score != 0)
 	{
+		char* start="Start";
+		if (screen == SIMPLE)
+		{
+			start="     ";
+		}
 		ILI9341_WriteString(30, BUTTON_Y, "Yes", Font_7x10, BLUE, WHITE);
-		ILI9341_WriteString(142, BUTTON_Y, "Start", Font_7x10, BLUE, WHITE);
+		ILI9341_WriteString(142, BUTTON_Y, start, Font_7x10, BLUE, WHITE);
 		ILI9341_WriteString(272, BUTTON_Y, "No", Font_7x10, BLUE, WHITE);
 		edit_score = 0;
 		render_scores(teams);

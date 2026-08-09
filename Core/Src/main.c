@@ -768,6 +768,14 @@ void Left_button_handler(void)
 		Reset_state(1);
 		break;
 	case SIMPLE:
+		if (!pressed_btn_team)
+		{
+			return;
+		}
+
+		answer = 1;
+		button_event_handler();
+		Reset_state(1);
 		break;
 	case ERUDIT:
 		break;
@@ -807,6 +815,8 @@ void Center_button_long_handler(void)
 		Reset_state(1);
 		break;
 	case SIMPLE:
+		LED_OFF;
+		Reset_state(1);
 		break;
 	case ERUDIT:
 		break;
@@ -837,6 +847,14 @@ void Right_button_handler(void)
 		pressed_btn_team = 0;
 		break;
 	case SIMPLE:
+		if (!pressed_btn_team)
+		{
+			return;
+		}
+
+		answer = 0;
+		button_event_handler();
+		pressed_btn_team = 0;
 		break;
 	case ERUDIT:
 		break;
