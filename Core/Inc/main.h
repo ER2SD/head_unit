@@ -54,6 +54,8 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 
+void Reset_state(uint8_t redraw);
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

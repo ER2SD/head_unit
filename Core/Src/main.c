@@ -76,7 +76,7 @@ uint16_t teams_fs_state[8] =
 uint16_t pressed_btn_team = 0;								//номер нажатой кнопки команды
 uint16_t scores[8] =
 { 0 };						//количество очков команд [0-7]
-uint16_t answer = 0;										//положительный или отрицательный ответ
+uint16_t answer = 1;										//положительный или отрицательный ответ
 uint8_t rx_data;									//номер нажатой кнопки передатчика
 uint16_t falstart_enabled = 0;
 uint8_t flag_press = 1;
@@ -108,7 +108,7 @@ static void MX_TIM3_Init(void);
 
 void Main_loop_header(void);
 void Main_loop_footer(void);
-void Reset_state(void);
+// void Reset_state(void);
 void Left_button_handler(void);
 void Center_button_short_handler(void);
 void Center_button_long_handler(void);
@@ -709,7 +709,7 @@ void Main_loop_header(void)
 		{
 			LED_TGL;
 			HAL_TIM_Base_Stop_IT(&htim2);																		//Останавливаем таймер
-			Reset_state();
+			Reset_state(1);
 		}
 		break;
 	default:
@@ -737,12 +737,16 @@ void Main_loop_footer(void)
 	}
 }
 
-void Reset_state(void)
+void Reset_state(uint8_t redraw)
 {
 	timer_running = 0;
-	g_timer_seconds = 60; 									//Устанавливаем начальное время
-	reset_timer = 1;										//Сброс таймера
-	reset_color();											//установка цвета комманд для сделующего вопроса.
+	g_timer_seconds = 60;
+	reset_timer = 1;
+	answer = 1;
+	if (redraw)
+	{
+		reset_color();
+	}
 	Reset_answer_state();
 	Reset_falstart_state();
 	Reset_falstart_screen();
@@ -761,7 +765,7 @@ void Left_button_handler(void)
 
 		answer = 1;																//Положительный или отрицательный ответ
 		button_event_handler();							//Если ответ не верный-команда выбывает (цвет надписи команды чёрный)
-		Reset_state();
+		Reset_state(1);
 		break;
 	case SIMPLE:
 		break;
@@ -800,7 +804,7 @@ void Center_button_long_handler(void)
 	case BRAIN_RING:
 		LED_OFF;
 		HAL_TIM_Base_Stop_IT(&htim2);
-		Reset_state();
+		Reset_state(1);
 		break;
 	case SIMPLE:
 		break;
@@ -821,11 +825,14 @@ void Right_button_handler(void)
 			return;
 		}
 
+		if (answer)
+		{
+			g_timer_seconds = 20;
+			reset_timer = 1;
+		}
+
 		timer_running = 0;
 		answer = 0;
-		g_timer_seconds = 20; 											//Устанавливаем начальное время
-		reset_timer = 1;										//Сброс таймера
-		//ILI9341_WriteString(230, 25, lcd_buf, Font_16x26, RED, MYFON); // вывод показаний таймера
 		button_event_handler();							//Если ответ не верный-команда выбывает (цвет надписи команды чёрный)
 		pressed_btn_team = 0;
 		break;
