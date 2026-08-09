@@ -37,6 +37,10 @@ extern uint16_t answer;											//положительный или отриц
 // macros to check the coordinates in range
 #define IS_WITHIN(x, y, x1, y1, x2, y2) ((x) > (x1)) && ((x) < (x2)) && ((y) > (y1)) && ((y) < (y2))
 
+// Set to GPIO_PIN_RESET if using Pull-Up (Pressed = GND)
+// Set to GPIO_PIN_SET   if using Pull-Down (Pressed = VCC)
+#define BUTTON_PRESSED_LEVEL   GPIO_PIN_RESET
+
 static const char *const team_digits[] =
 { "2", "3", "4", "5", "6", "7", "8" };
 
@@ -62,24 +66,71 @@ uint8_t Button_Read_left(void)
 	}
 	return 0;
 }
-//=======Обработчик сентральной кнопки KEY2==================
+//======= Center button handler KEY2==================
 uint8_t Button_Read_center(void)
 {
-	static uint32_t last_time = 0;
-	static uint8_t last_state = 0;
-	uint8_t current_state;
-	current_state = HAL_GPIO_ReadPin(BUTTON_PORT, BUTTON_PIN_CENTER);
-	if (current_state != last_state)
-	{
-		if (HAL_GetTick() - last_time > 20) // 20 мс антидребезг
-		{
-			last_time = HAL_GetTick();
-			last_state = current_state;
-			if (current_state == GPIO_PIN_SET)
-				return 1; // кнопка нажата
-		}
-	}
-	return 0;
+    typedef enum {
+        BTN_IDLE,
+        BTN_DEBOUNCE,
+        BTN_PRESSED,
+        BTN_LONG_HELD
+    } BTN_State_t;
+
+    static BTN_State_t state = BTN_IDLE;
+    static uint32_t timer = 0;
+
+    uint32_t now = HAL_GetTick();
+    uint8_t is_pressed = (HAL_GPIO_ReadPin(BUTTON_PORT, BUTTON_PIN_CENTER) == BUTTON_PRESSED_LEVEL);
+
+    switch (state)
+    {
+        case BTN_IDLE:
+            if (is_pressed)
+            {
+                timer = now;
+                state = BTN_DEBOUNCE;
+            }
+            break;
+
+        case BTN_DEBOUNCE:
+            if (!is_pressed)
+            {
+                // Contact bounce noise – ignore
+                state = BTN_IDLE;
+            }
+            else if ((now - timer) >= 30) // 30 ms debounce filter
+            {
+                // Valid press confirmed
+                timer = now;
+                state = BTN_PRESSED;
+            }
+            break;
+
+        case BTN_PRESSED:
+            if (!is_pressed)
+            {
+                // Released before 1000 ms -> Short Press
+                state = BTN_IDLE;
+                return 1;
+            }
+            else if ((now - timer) >= 1000)
+            {
+                // Held for 1000 ms -> Long Press
+                state = BTN_LONG_HELD;
+                return 2;
+            }
+            break;
+
+        case BTN_LONG_HELD:
+            if (!is_pressed)
+            {
+                // Button finally released after long press
+                state = BTN_IDLE;
+            }
+            break;
+    }
+
+    return 0; // No event
 }
 //=======Обработчик правой кнопки KEY3==================
 uint8_t Button_Read_right(void)
