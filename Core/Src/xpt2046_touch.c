@@ -124,7 +124,7 @@ static void draw_edit_buttons(void)
 	ILI9341_Draw_Filled_Rectangle_Coord(BUTTON_MINUS_X, BUTTON_MINUS_Y,
 	BUTTON_MINUS_X + BUTTON_MINUS_W, BUTTON_MINUS_Y + BUTTON_MINUS_H, WHITE);
 	ILI9341_WriteString(30, BUTTON_Y, "+", Font_7x10, BLUE, WHITE);
-	ILI9341_WriteString(142, BUTTON_Y, "save", Font_7x10, BLUE, WHITE);
+	ILI9341_WriteString(142, BUTTON_Y, "Save", Font_7x10, BLUE, WHITE);
 	ILI9341_WriteString(272, BUTTON_Y, "-", Font_7x10, BLUE, WHITE);
 }
 
@@ -170,9 +170,9 @@ void score_editing_handler(void)
 	if (Button_Read_center() && edit_score != 0)
 	{
 		draw_edit_buttons();
-		ILI9341_WriteString(30, BUTTON_Y, "yes", Font_7x10, BLUE, WHITE);
-		ILI9341_WriteString(142, BUTTON_Y, "start", Font_7x10, BLUE, WHITE);
-		ILI9341_WriteString(272, BUTTON_Y, "no", Font_7x10, BLUE, WHITE);
+		ILI9341_WriteString(30, BUTTON_Y, "Yes", Font_7x10, BLUE, WHITE);
+		ILI9341_WriteString(142, BUTTON_Y, "Start", Font_7x10, BLUE, WHITE);
+		ILI9341_WriteString(272, BUTTON_Y, "No", Font_7x10, BLUE, WHITE);
 		edit_score = 0;
 		render_scores(teams);
 	}

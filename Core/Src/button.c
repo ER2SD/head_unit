@@ -287,7 +287,10 @@ void Touchscreen_handler(void)
 				break;
 			}
 		case BRAIN_RING:
-			enable_score_editing(); //редактирование результата
+			if (!timer_running)
+			{
+				enable_score_editing(); //редактирование результата
+			}
             if (IS_WITHIN(x, y, 300, 0, 320, 20)) //если нажали крестик
 			{
 				screen_menu();

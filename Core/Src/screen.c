@@ -60,11 +60,6 @@ static inline void draw_team_score(uint8_t idx, uint16_t color)
 	ILI9341_WriteString(TEAM_SCORE_X, TEAM_START_Y + idx * TEAM_ROW_STEP, scope_buf, Font_11x18, color, MYFON);
 }
 
-static inline void draw_team_zero(uint16_t color)
-{
-	ILI9341_WriteString(TEAM_SCORE_X, TEAM_START_Y, "0", Font_11x18, color, MYFON);
-}
-
 //============= координатная сетка =====================
 void show_coordinate_grid()
 {
@@ -131,7 +126,7 @@ void screen_Brain_Ring(void)
 	{
 		uint16_t color = (i < teams) ? WHITE : BLACK;
 		draw_team_name(i, color);
-		draw_team_zero(color);
+		draw_team_score(i, color);
 	}
 
 	//===========Блок кнопки "закрыть"=================================
