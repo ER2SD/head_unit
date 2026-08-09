@@ -244,10 +244,8 @@ void Touchscreen_handler(void)
 				for (uint8_t i = 0; i < 8; i++)
 					scores[i] = 0;
 
-				//>>>>>>>>>>обработка состояния таймера
-				g_timer_seconds = 60; 								//Устанавливаем начальное время
-				reset_timer = 1;							//Сброс таймера
-				timer_running = 0;						//флаг остановки таймера
+				Reset_state(0);
+
 				HAL_TIM_Base_Stop_IT(&htim2);	//Останавливаем таймер
 				screen_Brain_Ring();					//переходим в экран игры "Брэйринг"
 				screen = BRAIN_RING;					//устанавливаем переменную для страктуры "switch(screen)"

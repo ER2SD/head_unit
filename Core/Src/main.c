@@ -76,7 +76,7 @@ uint16_t teams_fs_state[8] =
 uint16_t pressed_btn_team = 0;								//номер нажатой кнопки команды
 uint16_t scores[8] =
 { 0 };						//количество очков команд [0-7]
-uint16_t answer = 0;										//положительный или отрицательный ответ
+uint16_t answer = 1;										//положительный или отрицательный ответ
 uint8_t rx_data;									//номер нажатой кнопки передатчика
 uint16_t falstart_enabled = 0;
 uint8_t flag_press = 1;
@@ -85,7 +85,10 @@ char buf[64] =
 { 0, };
 uint16_t x = 0;
 uint16_t y = 0;
-enum { NONE = 0, SHORT = 1, LONG = 2 };
+enum
+{
+	NONE = 0, SHORT = 1, LONG = 2
+};
 game_screen screen = MAIN_MENU;
 uint16_t edit_score = 0;							//Признак редактирования счёта...
 /* USER CODE END PV */
@@ -103,7 +106,9 @@ static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
 
-void Reset_state(void);
+void Main_loop_header(void);
+void Main_loop_footer(void);
+// void Reset_state(void);
 void Left_button_handler(void);
 void Center_button_short_handler(void);
 void Center_button_long_handler(void);
@@ -172,20 +177,8 @@ int main(void)
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
-		if (g_timer_seconds == 0)
-		{
-			LED_TGL;
-			g_timer_seconds = 60;
-			timer_running = 0;    			//флаг остановки таймера
-			pressed_btn_team = 0;
-			HAL_TIM_Base_Stop_IT(&htim2);																		//Останавливаем таймер
-			sprintf(lcd_buf, "%02d ", g_timer_seconds);
-			ILI9341_WriteString(230, 25, lcd_buf, Font_16x26, RED, MYFON); 	// вывод показаний таймера
-			reset_color();												//установка цвета комманд для сделующего вопроса.
-			Reset_answer_state();
-			Reset_falstart_state();
-			Reset_falstart_screen();																						//сброс фальшстарта
-		}
+
+		Main_loop_header();
 		NRF_Event_handler(); 										//Обработчик сигналов с кнопок передатчиков
 		Touchscreen_handler();						//Обработчик тачскрина
 
@@ -219,18 +212,7 @@ int main(void)
 			}
 		}
 
-		//================== RTC =========================
-		if (reset_timer)
-		{
-			reset_timer = 0;
-			sprintf(lcd_buf, "%02d ", g_timer_seconds);
-			if (screen == BRAIN_RING)
-			{
-				ILI9341_WriteString(230, 25, lcd_buf, Font_16x26, RED, MYFON); // вывод показаний таймера
-			}
-		}
-		//=================END RTC =======================
-
+		Main_loop_footer();
 	}
 	/* USER CODE END 3 */
 }
@@ -718,12 +700,53 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-void Reset_state(void)
+void Main_loop_header(void)
+{
+	switch (screen)
+	{
+	case BRAIN_RING:
+		if (g_timer_seconds == 0)
+		{
+			LED_TGL;
+			HAL_TIM_Base_Stop_IT(&htim2);																		//Останавливаем таймер
+			Reset_state(1);
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+void Main_loop_footer(void)
+{
+	switch (screen)
+	{
+	case BRAIN_RING:
+		if (reset_timer)
+		{
+			reset_timer = 0;
+			sprintf(lcd_buf, "%02d ", g_timer_seconds);
+			if (screen == BRAIN_RING)
+			{
+				ILI9341_WriteString(230, 25, lcd_buf, Font_16x26, RED, MYFON); // вывод показаний таймера
+			}
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+void Reset_state(uint8_t redraw)
 {
 	timer_running = 0;
-	g_timer_seconds = 60; 									//Устанавливаем начальное время
-	reset_timer = 1;										//Сброс таймера
-	reset_color();											//установка цвета комманд для сделующего вопроса.
+	g_timer_seconds = 60;
+	reset_timer = 1;
+	answer = 1;
+	if (redraw)
+	{
+		reset_color();
+	}
 	Reset_answer_state();
 	Reset_falstart_state();
 	Reset_falstart_screen();
@@ -734,22 +757,22 @@ void Left_button_handler(void)
 {
 	switch (screen)
 	{
-		case BRAIN_RING:
-			if (!timer_running || !pressed_btn_team)
-			{
-				return;
-			}
-
-			answer = 1;																//Положительный или отрицательный ответ
-			button_event_handler();							//Если ответ не верный-команда выбывает (цвет надписи команды чёрный)
-			Reset_state();
-			break;
-		case SIMPLE:
-			break;
-		case ERUDIT:
-			break;
-		default:
+	case BRAIN_RING:
+		if (!timer_running || !pressed_btn_team)
+		{
 			return;
+		}
+
+		answer = 1;																//Положительный или отрицательный ответ
+		button_event_handler();							//Если ответ не верный-команда выбывает (цвет надписи команды чёрный)
+		Reset_state(1);
+		break;
+	case SIMPLE:
+		break;
+	case ERUDIT:
+		break;
+	default:
+		return;
 	}
 }
 
@@ -757,36 +780,38 @@ void Center_button_short_handler(void)
 {
 	switch (screen)
 	{
-		case BRAIN_RING:
-			timer_running = 1;
-			pressed_btn_team = 0;
-			HAL_TIM_Base_Start_IT(&htim2);
-			break;
-		case SIMPLE:
-			break;
-		case ERUDIT:
-			break;
-		default:
+	case BRAIN_RING:
+		if (pressed_btn_team)
+		{
 			return;
+		}
+		timer_running = 1;
+		HAL_TIM_Base_Start_IT(&htim2);
+		break;
+	case SIMPLE:
+		break;
+	case ERUDIT:
+		break;
+	default:
+		return;
 	}
 }
-
 
 void Center_button_long_handler(void)
 {
 	switch (screen)
 	{
-		case BRAIN_RING:
-			LED_OFF;
-			HAL_TIM_Base_Stop_IT(&htim2);
-			Reset_state();
-			break;
-		case SIMPLE:
-			break;
-		case ERUDIT:
-			break;
-		default:
-			return;
+	case BRAIN_RING:
+		LED_OFF;
+		HAL_TIM_Base_Stop_IT(&htim2);
+		Reset_state(1);
+		break;
+	case SIMPLE:
+		break;
+	case ERUDIT:
+		break;
+	default:
+		return;
 	}
 }
 
@@ -794,26 +819,29 @@ void Right_button_handler(void)
 {
 	switch (screen)
 	{
-		case BRAIN_RING:
-			if (!timer_running || !pressed_btn_team)
-			{
-				return;
-			}
-
-			timer_running = 0;
-			answer = 0;
-			g_timer_seconds = 20; 											//Устанавливаем начальное время
-			reset_timer = 1;										//Сброс таймера
-			//ILI9341_WriteString(230, 25, lcd_buf, Font_16x26, RED, MYFON); // вывод показаний таймера
-			button_event_handler();							//Если ответ не верный-команда выбывает (цвет надписи команды чёрный)
-			pressed_btn_team = 0;
-			break;
-		case SIMPLE:
-			break;
-		case ERUDIT:
-			break;
-		default:
+	case BRAIN_RING:
+		if (!timer_running || !pressed_btn_team)
+		{
 			return;
+		}
+
+		if (answer)
+		{
+			g_timer_seconds = 20;
+			reset_timer = 1;
+		}
+
+		timer_running = 0;
+		answer = 0;
+		button_event_handler();							//Если ответ не верный-команда выбывает (цвет надписи команды чёрный)
+		pressed_btn_team = 0;
+		break;
+	case SIMPLE:
+		break;
+	case ERUDIT:
+		break;
+	default:
+		return;
 	}
 }
 
