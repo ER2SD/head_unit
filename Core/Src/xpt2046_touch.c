@@ -184,7 +184,7 @@ void score_editing_handler(void)
 		ILI9341_WriteString(135, y_pos, scope_buf, Font_11x18, ORANGE, MYFON);
 	}
 
-	if (Button_Read_center() && edit_score != 0)
+	if (edit_score != 0 && Button_Read_center())
 	{
 		char* start="Start";
 		if (screen == SIMPLE)

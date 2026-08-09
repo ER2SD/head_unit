@@ -751,6 +751,7 @@ void Reset_state(uint8_t redraw)
 	Reset_answer_state();
 	Reset_falstart_state();
 	pressed_btn_team = 0;
+	edit_score = 0;
 }
 
 void Left_button_handler(void)
