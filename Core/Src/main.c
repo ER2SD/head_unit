@@ -85,6 +85,7 @@ char buf[64] =
 { 0, };
 uint16_t x = 0;
 uint16_t y = 0;
+enum { NONE = 0, SHORT = 1, LONG = 2 };
 game_screen screen = MAIN_MENU;
 uint16_t edit_score = 0;							//Признак редактирования счёта...
 /* USER CODE END PV */
@@ -102,8 +103,10 @@ static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
 
+void Reset_state(void);
 void Left_button_handler(void);
-void Center_button_handler(void);
+void Center_button_short_handler(void);
+void Center_button_long_handler(void);
 void Right_button_handler(void);
 
 /* USER CODE END PFP */
@@ -198,9 +201,16 @@ int main(void)
 				Left_button_handler();
 			}
 
-			if (Button_Read_center())
+			uint8_t center_press = Button_Read_center();
+
+			if (center_press == SHORT)
 			{
-				Center_button_handler();
+				Center_button_short_handler();
+			}
+
+			if (center_press == LONG)
+			{
+				Center_button_long_handler();
 			}
 
 			if (Button_Read_right())
@@ -708,6 +718,18 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+void Reset_state(void)
+{
+	timer_running = 0;
+	g_timer_seconds = 60; 									//Устанавливаем начальное время
+	reset_timer = 1;										//Сброс таймера
+	reset_color();											//установка цвета комманд для сделующего вопроса.
+	Reset_answer_state();
+	Reset_falstart_state();
+	Reset_falstart_screen();
+	pressed_btn_team = 0;
+}
+
 void Left_button_handler(void)
 {
 	switch (screen)
@@ -718,17 +740,9 @@ void Left_button_handler(void)
 				return;
 			}
 
-			//обработка состояния таймера
-			timer_running = 0;
-			g_timer_seconds = 60; 											//Устанавливаем начальное время
-			reset_timer = 1;										//Сброс таймера
 			answer = 1;																//Положительный или отрицательный ответ
 			button_event_handler();							//Если ответ не верный-команда выбывает (цвет надписи команды чёрный)
-			reset_color();											//установка цвета комманд для сделующего вопроса.
-			Reset_answer_state();
-			Reset_falstart_state();
-			Reset_falstart_screen();
-			pressed_btn_team = 0;
+			Reset_state();
 			break;
 		case SIMPLE:
 			break;
@@ -739,7 +753,7 @@ void Left_button_handler(void)
 	}
 }
 
-void Center_button_handler(void)
+void Center_button_short_handler(void)
 {
 	switch (screen)
 	{
@@ -747,6 +761,25 @@ void Center_button_handler(void)
 			timer_running = 1;
 			pressed_btn_team = 0;
 			HAL_TIM_Base_Start_IT(&htim2);
+			break;
+		case SIMPLE:
+			break;
+		case ERUDIT:
+			break;
+		default:
+			return;
+	}
+}
+
+
+void Center_button_long_handler(void)
+{
+	switch (screen)
+	{
+		case BRAIN_RING:
+			LED_OFF;
+			HAL_TIM_Base_Stop_IT(&htim2);
+			Reset_state();
 			break;
 		case SIMPLE:
 			break;
