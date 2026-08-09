@@ -61,10 +61,6 @@ extern uint8_t flag_press;
 extern uint16_t teams;
 extern char scope_buf[6];
 
-extern uint8_t timer_running;
-extern volatile int g_timer_seconds;
-extern volatile uint8_t reset_timer;
-
 static inline void uint16_to_str(uint16_t val, char *buf, uint8_t maxlen)
 {
 	if (val == 0)
@@ -179,20 +175,5 @@ void score_editing_handler(void)
 		ILI9341_WriteString(272, BUTTON_Y, "no", Font_7x10, BLUE, WHITE);
 		edit_score = 0;
 		render_scores(teams);
-	}
-}
-
-void hide_reset_timer_button(void)
-{
-	if (x > 220 && x < 280 && y > 80 && y < 120)
-	{
-		ILI9341_Draw_Filled_Rectangle_Coord(220, 80, 280, 120, MYFON);
-		g_timer_seconds = 60;
-		reset_timer = 1;
-		timer_running = 0;
-		Reset_answer_state();
-		Reset_falstart_state();
-		Reset_falstart_screen();
-		HAL_TIM_Base_Stop_IT(&htim2);
 	}
 }

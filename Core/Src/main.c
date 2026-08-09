@@ -103,6 +103,7 @@ static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
 
+void Reset_state(void);
 void Left_button_handler(void);
 void Center_button_short_handler(void);
 void Center_button_long_handler(void);
@@ -717,6 +718,18 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+void Reset_state(void)
+{
+	timer_running = 0;
+	g_timer_seconds = 60; 									//Устанавливаем начальное время
+	reset_timer = 1;										//Сброс таймера
+	reset_color();											//установка цвета комманд для сделующего вопроса.
+	Reset_answer_state();
+	Reset_falstart_state();
+	Reset_falstart_screen();
+	pressed_btn_team = 0;
+}
+
 void Left_button_handler(void)
 {
 	switch (screen)
@@ -727,17 +740,9 @@ void Left_button_handler(void)
 				return;
 			}
 
-			//обработка состояния таймера
-			timer_running = 0;
-			g_timer_seconds = 60; 											//Устанавливаем начальное время
-			reset_timer = 1;										//Сброс таймера
 			answer = 1;																//Положительный или отрицательный ответ
 			button_event_handler();							//Если ответ не верный-команда выбывает (цвет надписи команды чёрный)
-			reset_color();											//установка цвета комманд для сделующего вопроса.
-			Reset_answer_state();
-			Reset_falstart_state();
-			Reset_falstart_screen();
-			pressed_btn_team = 0;
+			Reset_state();
 			break;
 		case SIMPLE:
 			break;
@@ -773,15 +778,8 @@ void Center_button_long_handler(void)
 	{
 		case BRAIN_RING:
 			LED_OFF;
-			g_timer_seconds = 60;
-			reset_timer = 1;
-			timer_running = 0;
-			pressed_btn_team = 0;
 			HAL_TIM_Base_Stop_IT(&htim2);
-			Reset_answer_state();
-			Reset_falstart_state();
-			Reset_falstart_screen();
-			reset_color();
+			Reset_state();
 			break;
 		case SIMPLE:
 			break;

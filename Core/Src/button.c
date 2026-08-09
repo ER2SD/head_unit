@@ -157,13 +157,6 @@ static const char *const team_names[] =
 static const uint16_t team_y_pos[] =
 { 50, 70, 90, 110, 130, 150, 170, 190 };
 
-void Show_reset_timer_button(void)
-{
-	ILI9341_Draw_Filled_Rectangle_Coord(220, 80, 280, 120, WHITE);
-	ILI9341_WriteString(233, 90, "RESET", Font_7x10, BLACK, WHITE);
-	ILI9341_WriteString(232, 105, "TIMER", Font_7x10, BLACK, WHITE);
-}
-
 void Reset_answer_state(void)
 {
 	for (uint8_t i = 0; i < 8; i++)
@@ -208,7 +201,6 @@ void NRF_Event_handler(void)
 			ILI9341_WriteString(175, team_y_pos[team_idx] + 2, "!", Font_11x18, RED, MYFON);
 
 			teams_fs_state[team_idx] = 1;
-			Show_reset_timer_button();
 		}
 		else if (!teams_fs_state[team_idx] && timer_running)
 		{
@@ -298,10 +290,6 @@ void Touchscreen_handler(void)
 			}
 		case BRAIN_RING:
 			enable_score_editing(); //редактирование результата
-			if (falstart_enabled)
-			{
-				hide_reset_timer_button(); //выключение кнопки "reset timer"
-			}
             if (IS_WITHIN(x, y, 300, 0, 320, 20)) //если нажали крестик
 			{
 				screen_menu();
