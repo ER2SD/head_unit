@@ -746,10 +746,10 @@ void Reset_state(uint8_t redraw)
 	if (redraw)
 	{
 		reset_color();
+		Reset_falstart_screen();
 	}
 	Reset_answer_state();
 	Reset_falstart_state();
-	Reset_falstart_screen();
 	pressed_btn_team = 0;
 }
 
