@@ -758,8 +758,11 @@ void Center_button_short_handler(void)
 	switch (screen)
 	{
 		case BRAIN_RING:
+			if (pressed_btn_team)
+			{
+				return;
+			}
 			timer_running = 1;
-			pressed_btn_team = 0;
 			HAL_TIM_Base_Start_IT(&htim2);
 			break;
 		case SIMPLE:
