@@ -147,8 +147,16 @@ void enable_score_editing(void)
 
 void score_editing_handler(void)
 {
-	if (edit_score < 1 || edit_score > MAX_TEAMS)
+	if (screen == MAIN_MENU || screen == SETTINGS)
+	{
 		return;
+	}
+
+	if (edit_score < 1 || edit_score > MAX_TEAMS)
+	{
+		return;
+	}
+
 	uint8_t idx = edit_score - 1;
 	uint16_t y_pos = EDIT_ZONE_START_Y + idx * EDIT_ZONE_ROW_STEP;
 
@@ -169,7 +177,6 @@ void score_editing_handler(void)
 
 	if (Button_Read_center() && edit_score != 0)
 	{
-		draw_edit_buttons();
 		ILI9341_WriteString(30, BUTTON_Y, "Yes", Font_7x10, BLUE, WHITE);
 		ILI9341_WriteString(142, BUTTON_Y, "Start", Font_7x10, BLUE, WHITE);
 		ILI9341_WriteString(272, BUTTON_Y, "No", Font_7x10, BLUE, WHITE);
