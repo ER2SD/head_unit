@@ -64,20 +64,20 @@ UART_HandleTypeDef huart2;
 char str1[64] =
 { 0 };
 volatile int g_timer_seconds = 60;				//Начальное значение таймера
-volatile uint8_t reset_timer = 0;	//старт/стоп таймера
-uint8_t timer_running = 0;   			//0 = стоп, 1 = работает
-uint8_t btn_prev = 1;        			//предыдущее состояние кнопки
-char lcd_buf[16];									//буфер значения таймера
+volatile uint8_t reset_timer = 0;				//старт/стоп таймера
+uint8_t timer_running = 0;   					//0 = стоп, 1 = работает
+uint8_t btn_prev = 1;        					//предыдущее состояние кнопки
+char lcd_buf[16];								//буфер значения таймера
 uint16_t teams = 2;								//номер команды
 uint16_t teams_answer_state[8] =
-{ 0 };								// Teams answer state
+{ 0 };											// Teams answer state
 uint16_t teams_fs_state[8] =
-{ 0 };								// Teams false start state
-uint16_t pressed_btn_team = 0;								//номер нажатой кнопки команды
+{ 0 };											// Teams false start state
+uint16_t pressed_btn_team = 0;					//номер нажатой кнопки команды
 uint16_t scores[8] =
-{ 0 };						//количество очков команд [0-7]
-uint16_t answer = 1;										//положительный или отрицательный ответ
-uint8_t rx_data;									//номер нажатой кнопки передатчика
+{ 0 };											//количество очков команд [0-7]
+uint16_t answer = 1;							//положительный или отрицательный ответ
+uint8_t rx_data;								//номер нажатой кнопки передатчика
 uint16_t falstart_enabled = 0;
 uint8_t flag_press = 1;
 uint32_t time_press = 0;
@@ -90,7 +90,7 @@ enum
 	NONE = 0, SHORT = 1, LONG = 2
 };
 game_screen screen = MAIN_MENU;
-uint16_t edit_score = 0;							//Признак редактирования счёта...
+uint16_t edit_score = 0;						//Признак редактирования счёта...
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -191,7 +191,8 @@ int main(void)
 
 		Main_loop_header();
 		NRF_Event_handler(); 										//Обработчик сигналов с кнопок передатчиков
-		Touchscreen_handler();						//Обработчик тачскрина
+		Touchscreen_handler();										//Обработчик тачскрина
+		Main_loop_footer();											//Обработчик
 
 		//>>>>>>>>>>Обработчик нажатия кнопок. Для каждого экрана своя логика
 		if (edit_score != 0)										//Если 0 тогда обрабатываем кнопки если иначе - пропускаем все кнопки
@@ -223,7 +224,7 @@ int main(void)
 			}
 		}
 
-		Main_loop_footer();
+
 	}
   /* USER CODE END 3 */
 }
@@ -732,18 +733,29 @@ void Main_loop_header(void)
 	}
 }
 
-void Main_loop_footer(void)
-{
-	switch (screen)
-	{
+void Main_loop_footer(void) {
+	switch (screen) {
 	case BRAIN_RING:
-		if (reset_timer)
-		{
+		if (reset_timer) {
 			reset_timer = 0;
 			sprintf(lcd_buf, "%02d ", g_timer_seconds);
 			if (screen == BRAIN_RING)
 			{
 				ILI9341_WriteString(230, 25, lcd_buf, Font_16x26, RED, MYFON); // вывод показаний таймера
+			}
+			// check if 10 seconds left and notify it via sound
+			if(10 == g_timer_seconds) {
+				HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+				Set_PWM_Frequency(3000);
+				HAL_Delay(500);
+				HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+			}
+
+			if(1 == g_timer_seconds) {
+				HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+				Set_PWM_Frequency(1000);
+				HAL_Delay(1000);
+				HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
 			}
 		}
 		break;
@@ -800,24 +812,25 @@ void Left_button_handler(void)
 	}
 }
 
-void Center_button_short_handler(void)
-{
-	switch (screen)
-	{
-	case BRAIN_RING:
-		if (pressed_btn_team)
-		{
+void Center_button_short_handler(void) {
+	switch (screen) {
+		case BRAIN_RING:
+			if (pressed_btn_team) {	// already one team responded
+				return;
+			}
+			timer_running = 1;
+			HAL_TIM_Base_Start_IT(&htim2);
+			HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+			Set_PWM_Frequency(1000);
+			HAL_Delay(500);
+			HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+			break;
+		case SIMPLE:
+			break;
+		case ERUDIT:
+			break;
+		default:
 			return;
-		}
-		timer_running = 1;
-		HAL_TIM_Base_Start_IT(&htim2);
-		break;
-	case SIMPLE:
-		break;
-	case ERUDIT:
-		break;
-	default:
-		return;
 	}
 }
 
@@ -829,10 +842,6 @@ void Center_button_long_handler(void)
 		LED_OFF;
 		HAL_TIM_Base_Stop_IT(&htim2);
 		Reset_state(1);
-		HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-		Set_PWM_Frequency(2500);
-		HAL_Delay(1000);
-		HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
 		break;
 	case SIMPLE:
 		LED_OFF;
