@@ -818,12 +818,18 @@ void Center_button_short_handler(void) {
 			if (pressed_btn_team) {	// already one team responded
 				return;
 			}
-			timer_running = 1;
-			HAL_TIM_Base_Start_IT(&htim2);
-			HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-			Set_PWM_Frequency(1000);
-			HAL_Delay(500);
-			HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+
+			if(1 == timer_running) {
+				return;
+			} else {
+				timer_running = 1;
+				HAL_TIM_Base_Start_IT(&htim2);
+				HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+				Set_PWM_Frequency(1000);
+				HAL_Delay(500);
+				HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+			}
+
 			break;
 		case SIMPLE:
 			break;
