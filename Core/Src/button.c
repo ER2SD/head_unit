@@ -188,25 +188,27 @@ void NRF_Event_handler(void)
 
 		uint8_t team_idx = rx_data - 1;
 		uint8_t is_false_start = (falstart_enabled && timer_running == 0);
-		if (pressed_btn_team || teams_answer_state[team_idx] || team_idx >= teams)
-		{
+		if (pressed_btn_team || teams_answer_state[team_idx] || team_idx >= teams) {
 			return;
 		}
 
-		if (is_false_start)
-		{
+		if (is_false_start) {
 			ILI9341_WriteString(7, team_y_pos[team_idx], team_names[team_idx], Font_11x18, BLACK, MYFON);
 			ILI9341_WriteString(175, team_y_pos[team_idx] + 2, "!", Font_11x18, RED, MYFON);
 
-			teams_fs_state[team_idx] = 1;
+			if(!teams_fs_state[team_idx]) {
+				beep(1000, 250);
+				teams_fs_state[team_idx] = 1;
+			}
 		}
-		else if (!teams_fs_state[team_idx] && timer_running)
-		{
+		else if (!teams_fs_state[team_idx] && timer_running) {
+			beep(1000, 250);
 			pressed_btn_team = rx_data;
 			teams_answer_state[team_idx] = 1;
 			ILI9341_WriteString(7, team_y_pos[team_idx], team_names[team_idx], Font_11x18, YELLOW, MYFON);
 			HAL_TIM_Base_Stop_IT(&htim2);
 		}
+
 		break;
 	case SIMPLE:
 		rx_data = NRF24L01_Receive();

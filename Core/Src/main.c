@@ -119,14 +119,18 @@ void Right_button_handler(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-void Set_PWM_Frequency(uint32_t frequency)
-{
-uint32_t arr;
+void Set_PWM_Frequency(uint32_t frequency) {
+	uint32_t arr;
+	arr = (32000000 / frequency) - 1;
+	__HAL_TIM_SET_AUTORELOAD(&htim3, arr);
+	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, (arr + 1) / 2);
+}
 
-arr = (32000000 / frequency) - 1;
-
-__HAL_TIM_SET_AUTORELOAD(&htim3, arr);
-__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, (arr + 1) / 2);
+void beep(int frequency, int duration) {
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+	Set_PWM_Frequency(frequency);
+	HAL_Delay(duration);
+	HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
 }
 
 /* USER CODE END 0 */
@@ -739,23 +743,20 @@ void Main_loop_footer(void) {
 		if (reset_timer) {
 			reset_timer = 0;
 			sprintf(lcd_buf, "%02d ", g_timer_seconds);
-			if (screen == BRAIN_RING)
-			{
-				ILI9341_WriteString(230, 25, lcd_buf, Font_16x26, RED, MYFON); // вывод показаний таймера
-			}
-			// check if 10 seconds left and notify it via sound
-			if(10 == g_timer_seconds) {
-				HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-				Set_PWM_Frequency(3000);
-				HAL_Delay(500);
-				HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
-			}
+			ILI9341_WriteString(230, 25, lcd_buf, Font_16x26, RED, MYFON); // вывод показаний таймера
+			switch(g_timer_seconds) {
+				case 10: { // check if 10 seconds left and notify it via sound
+					beep(3000, 500);
+					break;
+				}
 
-			if(1 == g_timer_seconds) {
-				HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-				Set_PWM_Frequency(1000);
-				HAL_Delay(1000);
-				HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+				case 1: { // check if 1 second left and notify it via sound
+					beep(1000, 1000);
+					break;
+				}
+
+				default:
+					break;
 			}
 		}
 		break;
@@ -824,10 +825,7 @@ void Center_button_short_handler(void) {
 			} else {
 				timer_running = 1;
 				HAL_TIM_Base_Start_IT(&htim2);
-				HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-				Set_PWM_Frequency(1000);
-				HAL_Delay(500);
-				HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+				beep(1000, 500);
 			}
 
 			break;
