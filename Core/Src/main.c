@@ -841,6 +841,7 @@ void Center_button_short_handler(void) {
 			if(1 == timer_running) {
 				return;
 			} else {
+				NRF24_FlushRX();
 				timer_running = 1;
 				HAL_TIM_Base_Start_IT(&htim2);
 				beep(800, 800);
@@ -861,6 +862,7 @@ void Center_button_long_handler(void)
 	switch (screen)
 	{
 	case BRAIN_RING:
+		NRF24_FlushRX();
 		LED_OFF;
 		HAL_TIM_Base_Stop_IT(&htim2);
 		Reset_state(1);
