@@ -769,7 +769,7 @@ void Main_loop_footer(void) {
 				}
 
 				case 0: { // time is out, beep again for the last time
-					beep(1500, 1000);
+					beep(500, 1000);
 					break;
 				}
 
@@ -843,7 +843,7 @@ void Center_button_short_handler(void) {
 			} else {
 				timer_running = 1;
 				HAL_TIM_Base_Start_IT(&htim2);
-				beep(1000, 500);
+				beep(800, 800);
 			}
 
 			break;
