@@ -841,7 +841,7 @@ void Center_button_short_handler(void) {
 				NRF24_FlushRX();
 				timer_running = 1;
 				HAL_TIM_Base_Start_IT(&htim2);
-				beep(800, 800);
+				beep(5000, 800);
 			}
 
 			break;
