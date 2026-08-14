@@ -57,7 +57,7 @@ void Error_Handler(void);
 /* USER CODE BEGIN EFP */
 
 void Reset_state(uint8_t redraw);
-void beep(int frequency, int duration);
+void beep(uint32_t frequency, uint16_t duration_ms);
 
 /* USER CODE END EFP */
 

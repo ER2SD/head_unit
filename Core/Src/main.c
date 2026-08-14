@@ -89,6 +89,11 @@ enum
 {
 	NONE = 0, SHORT = 1, LONG = 2
 };
+
+static volatile uint8_t  beep_active = 0;
+static volatile uint32_t beep_start_tick = 0;
+static volatile uint16_t beep_duration = 0;
+
 game_screen screen = MAIN_MENU;
 uint16_t edit_score = 0;						//Признак редактирования счёта...
 /* USER CODE END PV */
@@ -126,11 +131,23 @@ void Set_PWM_Frequency(uint32_t frequency) {
 	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, (arr + 1) / 2);
 }
 
-void beep(int frequency, int duration) {
-	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+static void beep_update(void) {
+	if (beep_active && (HAL_GetTick() - beep_start_tick) >= beep_duration) {
+		HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+		beep_active = 0;
+	}
+}
+
+void beep(uint32_t frequency, uint16_t duration_ms) {
+	if (beep_active) {
+		HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+		beep_active = 0;
+	}
 	Set_PWM_Frequency(frequency);
-	HAL_Delay(duration);
-	HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+	beep_start_tick = HAL_GetTick();
+	beep_duration = duration_ms;
+	beep_active = 1;
 }
 
 /* USER CODE END 0 */
@@ -197,6 +214,7 @@ int main(void)
 		NRF_Event_handler(); 										//Обработчик сигналов с кнопок передатчиков
 		Touchscreen_handler();										//Обработчик тачскрина
 		Main_loop_footer();											//Обработчик
+		beep_update();												//check the current beep state
 
 		//>>>>>>>>>>Обработчик нажатия кнопок. Для каждого экрана своя логика
 		if (edit_score != 0)										//Если 0 тогда обрабатываем кнопки если иначе - пропускаем все кнопки
@@ -746,12 +764,12 @@ void Main_loop_footer(void) {
 			ILI9341_WriteString(230, 25, lcd_buf, Font_16x26, RED, MYFON); // вывод показаний таймера
 			switch(g_timer_seconds) {
 				case 10: { // check if 10 seconds left and notify it via sound
-					beep(3000, 500);
+					beep(3000, 700);
 					break;
 				}
 
-				case 1: { // check if 1 second left and notify it via sound
-					beep(1000, 1000);
+				case 0: { // time is out, beep again for the last time
+					beep(1500, 1000);
 					break;
 				}
 
