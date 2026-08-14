@@ -144,7 +144,7 @@ void screen_Simple(void)
 	ILI9341_WriteString(20, 10, "Simple", Font_11x18, OLIVE, MYFON);
 	ILI9341_WriteString(122, 36, "Score", Font_7x10, BLUE, MYFON);
 	ILI9341_Draw_Filled_Rectangle_Coord(20, 220, 60, 240, WHITE);
-	ILI9341_Draw_Filled_Rectangle_Coord(130, 220, 190, 240, WHITE);
+	//ILI9341_Draw_Filled_Rectangle_Coord(130, 220, 190, 240, WHITE);
 	ILI9341_Draw_Filled_Rectangle_Coord(260, 220, 300, 240, WHITE);
 	ILI9341_WriteString(30, 225, "Yes", Font_7x10, BLUE, WHITE);
 	ILI9341_WriteString(272, 225, "No", Font_7x10, BLUE, WHITE);
