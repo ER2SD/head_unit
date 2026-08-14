@@ -743,8 +743,9 @@ void Main_loop_header(void)
 	switch (screen)
 	{
 	case BRAIN_RING:
-		if (g_timer_seconds == 0)
+		if ( 0 == g_timer_seconds)
 		{
+			beep(500, 1000);
 			LED_TGL;
 			HAL_TIM_Base_Stop_IT(&htim2);																		//Останавливаем таймер
 			Reset_state(1);
@@ -768,13 +769,9 @@ void Main_loop_footer(void) {
 					break;
 				}
 
-				case 0: { // time is out, beep again for the last time
-					beep(500, 1000);
+				default: {
 					break;
 				}
-
-				default:
-					break;
 			}
 		}
 		break;
