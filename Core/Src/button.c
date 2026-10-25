@@ -239,7 +239,6 @@ void NRF_Event_handler(void) {
 			timer_running = 0;
 			teams_answer_state[idx] = 1;
 			ILI9341_WriteString(7, team_y_pos[idx], team_names[idx], Font_11x18, YELLOW, MYFON);
-			HAL_TIM_Base_Stop_IT(&htim2);
 			break;
 		}
 

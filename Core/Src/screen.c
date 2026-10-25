@@ -307,7 +307,6 @@ void button_event_handler(void)
 			switch(screen) {
 				case ERUDIT: {
 					scores[idx] -= question_id * 10;
-					question_id ++;
 					if(question_id > 5) {
 						question_id = 1;
 					}

@@ -752,6 +752,7 @@ void Main_loop_header(void) {
 			LED_TGL;
 			HAL_TIM_Base_Stop_IT(&htim2);																		//Останавливаем таймер
 			Reset_state(1, screen);
+			question_id++;
 		}
 		break;
 
@@ -812,6 +813,8 @@ void Reset_state(uint8_t redraw, uint8_t screen) {
 
 	case ERUDIT:
 		g_timer_seconds = 10;
+		ILI9341_Draw_Filled_Rectangle_Coord(130, 220, 190, 240, WHITE);
+		ILI9341_WriteString(142, 225, "Start", Font_7x10, BLUE, WHITE);
 		break;
 
 	default:
@@ -824,8 +827,6 @@ void Reset_state(uint8_t redraw, uint8_t screen) {
 		reset_color();
 		Reset_falstart_screen();
 	}
-	ILI9341_Draw_Filled_Rectangle_Coord(130, 220, 190, 240, WHITE);
-	ILI9341_WriteString(142, 225, "Start", Font_7x10, BLUE, WHITE);
 	Reset_answer_state();
 	Reset_falstart_state();
 	pressed_btn_team = 0;
@@ -987,9 +988,11 @@ void Right_button_handler(void)
 		if (!pressed_btn_team) {
 			return;
 		}
+
 		answer = 0;
-		HAL_TIM_Base_Start_IT(&htim2);
+		beep(800, 800);
 		g_timer_seconds = 10;
+		reset_timer = 1;
 		timer_running = 1;
 		button_event_handler();
 		pressed_btn_team = 0;
