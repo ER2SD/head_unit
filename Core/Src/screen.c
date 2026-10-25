@@ -95,9 +95,9 @@ void screen_menu()
 	ILI9341_Fill_Screen(YELLOW);
 	ILI9341_Draw_Filled_Rectangle_Coord(10, 10, 310, 230, RED);
 	ILI9341_WriteString(128, 12, "CMJI", Font_16x26, NAVY, RED);
-	ILI9341_Draw_Filled_Rectangle_Coord(20, 60, 100, 120, BLUE); // old 20, 60, 150, 120
+	ILI9341_Draw_Filled_Rectangle_Coord(20, 60, 100, 120, BLUE);
 	ILI9341_Draw_Filled_Rectangle_Coord(120, 60, 200, 120, BLUE);
-	ILI9341_Draw_Filled_Rectangle_Coord(220, 60, 300, 120, BLUE); // old 170, 60, 300, 120
+	ILI9341_Draw_Filled_Rectangle_Coord(220, 60, 300, 120, BLUE);
 	ILI9341_Draw_Filled_Rectangle_Coord(20, 150, 300, 210, BLUE);
 	ILI9341_WriteString(32, 82, "Brain", Font_11x18, ORANGE, BLUE);
 	ILI9341_WriteString(128, 82, "Simple", Font_11x18, ORANGE, BLUE);
@@ -144,7 +144,6 @@ void screen_Simple(void)
 	ILI9341_WriteString(20, 10, "Simple", Font_11x18, OLIVE, MYFON);
 	ILI9341_WriteString(122, 36, "Score", Font_7x10, BLUE, MYFON);
 	ILI9341_Draw_Filled_Rectangle_Coord(20, 220, 60, 240, WHITE);
-	//ILI9341_Draw_Filled_Rectangle_Coord(130, 220, 190, 240, WHITE);
 	ILI9341_Draw_Filled_Rectangle_Coord(260, 220, 300, 240, WHITE);
 	ILI9341_WriteString(30, 225, "Yes", Font_7x10, BLUE, WHITE);
 	ILI9341_WriteString(272, 225, "No", Font_7x10, BLUE, WHITE);
@@ -163,11 +162,27 @@ void screen_Simple(void)
 }
 
 //================== эрудит квартет ====================
-void screen_Erudit_Quartet(void)
-{
+void screen_Erudit_Quartet(void) {
 	ILI9341_Fill_Screen(YELLOW);
-	ILI9341_Draw_Filled_Rectangle_Coord(10, 10, 310, 230, RED);
-	ILI9341_WriteString(50, 12, "Erudit Quartet", Font_16x26, BLACK, RED);
+	ILI9341_Draw_Filled_Rectangle_Coord(5, 5, 315, 235, MYFON);
+	ILI9341_WriteString(20, 10, "Erudit Quartet", Font_11x18, OLIVE, MYFON);
+	ILI9341_WriteString(230, 10, "Timer", Font_7x10, BLUE, MYFON);
+	ILI9341_WriteString(122, 36, "Score", Font_7x10, BLUE, MYFON);
+	ILI9341_Draw_Filled_Rectangle_Coord(20, 220, 60, 240, WHITE);
+	ILI9341_Draw_Filled_Rectangle_Coord(130, 220, 190, 240, WHITE);
+	ILI9341_Draw_Filled_Rectangle_Coord(260, 220, 300, 240, WHITE);
+	ILI9341_WriteString(30, 225, "Yes", Font_7x10, BLUE, WHITE);
+	ILI9341_WriteString(142, 225, "Start", Font_7x10, BLUE, WHITE);
+	ILI9341_WriteString(272, 225, "No", Font_7x10, BLUE, WHITE);
+	tournament_table();
+
+	for (uint8_t i = 0; i < MAX_TEAMS; i++) {
+		uint16_t color = (i < teams) ? WHITE : BLACK;
+		draw_team_name(i, color);
+		draw_team_score(i, color);
+	}
+
+	//===========Блок кнопки "закрыть"=================================
 	ILI9341_Draw_Filled_Rectangle_Coord(299, 1, 319, 21, BLACK);
 	ILI9341_Random_line(302, 4, 315, 16, WHITE);
 	ILI9341_Random_line(302, 16, 315, 4, WHITE);
@@ -178,8 +193,8 @@ void screen_setting(void)
 {
 	ILI9341_Fill_Screen(YELLOW);
 	ILI9341_Draw_Filled_Rectangle_Coord(10, 10, 310, 230, RED);
-	ILI9341_WriteString(50, 15, "Brain &", Font_11x18, BLACK, RED);
-	ILI9341_WriteString(50, 35, "Simple", Font_11x18, BLACK, RED);
+	ILI9341_WriteString(30, 15, "Brain Ring", Font_11x18, BLACK, RED);
+	//ILI9341_WriteString(50, 35, "Simple", Font_11x18, BLACK, RED);
 	ILI9341_WriteString(200, 15, "Erudit", Font_11x18, BLACK, RED);
 	ILI9341_WriteString(200, 35, "Quartet", Font_11x18, BLACK, RED);
 	ILI9341_Draw_Vertical_Line(160, 0, 240, YELLOW);
@@ -191,7 +206,7 @@ void screen_setting(void)
 	//===========Блок настройки фальшстарт=================================
 	ILI9341_WriteString(15, 60, "False start", Font_11x18, BLUE, RED);
 	//===========Блок настроек колличества команд=================================
-	ILI9341_Draw_Horizontal_Line(10, 100, 150, WHITE);
+	ILI9341_Draw_Horizontal_Line(10, 100, 300, WHITE);
 	ILI9341_WriteString(15, 103, "Number of", Font_11x18, BLUE, RED);
 	ILI9341_WriteString(15, 118, "teams", Font_11x18, BLUE, RED);
 	ILI9341_Draw_Filled_Rectangle_Coord(156, 104, 122, 138, BLACK);
@@ -200,10 +215,20 @@ void screen_setting(void)
 	ILI9341_WriteString(100, 145, "+", Font_16x26, WHITE, BLACK);
 	ILI9341_WriteString(40, 145, "-", Font_16x26, WHITE, BLACK);
 	//===========Блок кнопки "save"=================================
-	ILI9341_Draw_Horizontal_Line(10, 180, 150, WHITE);
+	//ILI9341_Draw_Horizontal_Line(10, 180, 150, WHITE);
 	ILI9341_Draw_Filled_Rectangle_Coord(30, 190, 140, 220, WHITE);
 	ILI9341_Draw_Filled_Rectangle_Coord(32, 192, 138, 219, BLUE);
 	ILI9341_WriteString(65, 197, "SAVE", Font_11x18, BLACK, BLUE);
+
+	// the lengh of the timer in the game
+	ILI9341_WriteString(165, 60, "Timer timeout", Font_11x18, BLUE, RED);
+	ILI9341_Draw_Rectangle(245, 104, 60, 34, BLACK);
+	ILI9341_WriteString(165, 104, "seconds", Font_11x18, BLUE, RED);
+
+	ILI9341_Draw_Rectangle(180, 142, 36, 34, BLACK);
+	ILI9341_Draw_Rectangle(240, 142, 36, 34, BLACK);
+	ILI9341_WriteString(190, 145, "-", Font_16x26, WHITE, BLACK);
+	ILI9341_WriteString(250, 145, "+", Font_16x26, WHITE, BLACK);
 }
 
 //>>>>>>>>>>функция окрашивает в разные цвета команду которая нажала кнопку
@@ -226,8 +251,7 @@ void button_event_handler(void)
 }
 
 //>>>>>>>>>>функция окрашивает все надписи комманд в цвет по умолчанию
-void base_setting_color(void)
-{
+void base_setting_color(void) {
 	if (pressed_btn_team < 1 || pressed_btn_team > MAX_TEAMS)
 		return;
 	uint8_t idx = pressed_btn_team - 1;
@@ -235,16 +259,13 @@ void base_setting_color(void)
 }
 
 //>>>>>>>>>>фунция сброса фальшстарта
-void Reset_falstart_screen(void)
-{
+void Reset_falstart_screen(void) {
 	for (uint8_t i = 0; i < MAX_TEAMS; i++)
 		ILI9341_WriteString(175, TEAM_START_Y + 2 + i * TEAM_ROW_STEP, " ", Font_11x18, RED, MYFON);
 }
 
-void render_scores(uint16_t active_teams)
-{
-	for (uint8_t i = 0; i < MAX_TEAMS; i++)
-	{
+void render_scores(uint16_t active_teams) {
+	for (uint8_t i = 0; i < MAX_TEAMS; i++) {
 		uint16_t color = (i < active_teams) ? WHITE : BLACK;
 		draw_team_score(i, color);
 	}

@@ -812,8 +812,7 @@ void Left_button_handler(void)
 		Reset_state(1);
 		break;
 	case SIMPLE:
-		if (!pressed_btn_team)
-		{
+		if (!pressed_btn_team){
 			return;
 		}
 
@@ -822,6 +821,7 @@ void Left_button_handler(void)
 		Reset_state(1);
 		break;
 	case ERUDIT:
+
 		break;
 	default:
 		return;
@@ -843,11 +843,12 @@ void Center_button_short_handler(void) {
 				HAL_TIM_Base_Start_IT(&htim2);
 				beep(800, 800);
 			}
-
 			break;
 		case SIMPLE:
 			break;
 		case ERUDIT:
+			// check if there is no other team answered
+
 			break;
 		default:
 			return;
@@ -865,6 +866,7 @@ void Center_button_long_handler(void)
 		Reset_state(1);
 		break;
 	case SIMPLE:
+		NRF24_FlushRX();
 		LED_OFF;
 		Reset_state(1);
 		break;
