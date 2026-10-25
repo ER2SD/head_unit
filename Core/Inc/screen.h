@@ -19,6 +19,7 @@ void screen_Simple();
 void screen_Erudit_Quartet();
 void screen_setting();
 void tournament_table();
+void tournament_table_simple();
 void button_event_handler();
 void base_setting_color();
 void reset_color();

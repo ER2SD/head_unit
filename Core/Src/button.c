@@ -152,8 +152,7 @@ uint8_t Button_Read_right(void)
 //=======Обработчик кнопок передатчиков===============
 static const char *const team_names[] =
 { "Team 1", "Team 2", "Team 3", "Team 4", "Team 5", "Team 6", "Team 7", "Team 8" };
-static const uint16_t team_y_pos[] =
-{ 50, 70, 90, 110, 130, 150, 170, 190 };
+static const uint16_t team_y_pos[] = { 51, 71, 91, 111, 131, 151, 171, 191 };
 
 void Reset_answer_state(void)
 {
@@ -179,8 +178,7 @@ void NRF_Event_handler(void) {
 	switch (screen) {
 		case BRAIN_RING: {
 			rx_data = NRF24L01_Receive();
-			if (rx_data < 0x01 || rx_data > 0x08)
-			{
+			if (rx_data < 0x01 || rx_data > 0x08) {
 				return;
 			}
 
@@ -236,9 +234,12 @@ void NRF_Event_handler(void) {
 				return;
 			}
 
+			beep(1000, 250);
 			pressed_btn_team = rx_data;
+			timer_running = 0;
 			teams_answer_state[idx] = 1;
 			ILI9341_WriteString(7, team_y_pos[idx], team_names[idx], Font_11x18, YELLOW, MYFON);
+			HAL_TIM_Base_Stop_IT(&htim2);
 			break;
 		}
 

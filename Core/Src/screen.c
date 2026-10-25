@@ -22,7 +22,7 @@ char scope_buf[16];
 
 #define TEAM_LABEL_X      7
 #define TEAM_SCORE_X      135
-#define TEAM_START_Y      50
+#define TEAM_START_Y      51
 #define TEAM_ROW_STEP     20
 #define MAX_TEAMS         8
 
@@ -103,14 +103,19 @@ void show_coordinate_grid()
 }
 
 //============= Турнирная таблица =====================
-void tournament_table()
-{
+void tournament_table() {
 	for (uint16_t z = 50; z < 220; z += 20)
 		ILI9341_Draw_Horizontal_Line(120, z, 80, RED);
-	for (uint16_t h = 120; h < 200; h += 40)
+	for (uint16_t h = 120; h < 201; h += 40)
 		ILI9341_Draw_Vertical_Line(h, 50, 160, RED);
 }
-
+// simplified table
+void tournament_table_simple() {
+	for (uint16_t z = 50; z < 220; z += 20)
+			ILI9341_Draw_Horizontal_Line(120, z, 80, RED);
+	for (uint16_t h = 120; h < 201; h += 80)
+			ILI9341_Draw_Vertical_Line(h, 50, 160, RED);
+}
 //==============установка цвета названия комманд для следующего вопроса===========
 void reset_color(void)
 {
@@ -207,7 +212,7 @@ void screen_Erudit_Quartet(void) {
 	ILI9341_WriteString(30, 225, "Yes", Font_7x10, BLUE, WHITE);
 	ILI9341_WriteString(142, 225, "Start", Font_7x10, BLUE, WHITE);
 	ILI9341_WriteString(272, 225, "No", Font_7x10, BLUE, WHITE);
-	tournament_table();
+	tournament_table_simple();
 
 	for (uint8_t i = 0; i < MAX_TEAMS; i++) {
 		uint16_t color = (i < teams) ? WHITE : BLACK;
@@ -318,7 +323,6 @@ void button_event_handler(void)
 	int16_to_str(scores[idx], scope_buf, sizeof(scope_buf));
 	ILI9341_WriteString(TEAM_SCORE_X, TEAM_START_Y + idx * TEAM_ROW_STEP, "   ", Font_11x18, WHITE, MYFON);
 	ILI9341_WriteString(TEAM_SCORE_X, TEAM_START_Y + idx * TEAM_ROW_STEP, scope_buf, Font_11x18, WHITE, MYFON);
-
 	draw_team_name(idx, (answer == 0) ? BLACK : WHITE);
 }
 
@@ -333,7 +337,7 @@ void base_setting_color(void) {
 //>>>>>>>>>>фунция сброса фальшстарта
 void Reset_falstart_screen(void) {
 	for (uint8_t i = 0; i < MAX_TEAMS; i++)
-		ILI9341_WriteString(175, TEAM_START_Y + 2 + i * TEAM_ROW_STEP, " ", Font_11x18, RED, MYFON);
+		ILI9341_WriteString(175, TEAM_START_Y + i * TEAM_ROW_STEP, " ", Font_11x18, RED, MYFON);
 }
 
 void render_scores(uint16_t active_teams) {

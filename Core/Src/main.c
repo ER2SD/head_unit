@@ -988,6 +988,9 @@ void Right_button_handler(void)
 			return;
 		}
 		answer = 0;
+		HAL_TIM_Base_Start_IT(&htim2);
+		g_timer_seconds = 10;
+		timer_running = 1;
 		button_event_handler();
 		pressed_btn_team = 0;
 		break;
