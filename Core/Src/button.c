@@ -167,70 +167,83 @@ void Reset_falstart_state(void)
 		teams_fs_state[i] = 0;
 }
 
-void NRF_Event_handler(void)
-{
+void NRF_Event_handler(void) {
 	uint8_t status;
 	status = NRF24_ReadReg(STATUS) & 0x40;
-	if (!status)
-	{
+	if (!status) {
 		return;
 	}
+
 	Blink_LED();
 
-	switch (screen)
-	{
-	case BRAIN_RING:
-		rx_data = NRF24L01_Receive();
-		if (rx_data < 0x01 || rx_data > 0x08)
-		{
-			return;
-		}
-
-		uint8_t team_idx = rx_data - 1;
-		uint8_t is_false_start = (falstart_enabled && timer_running == 0);
-		if (pressed_btn_team || teams_answer_state[team_idx] || team_idx >= teams) {
-			return;
-		}
-
-		if (is_false_start) {
-			ILI9341_WriteString(7, team_y_pos[team_idx], team_names[team_idx], Font_11x18, BLACK, MYFON);
-			ILI9341_WriteString(175, team_y_pos[team_idx] + 2, "!", Font_11x18, RED, MYFON);
-
-			if(!teams_fs_state[team_idx]) {
-				beep(1000, 250);
-				teams_fs_state[team_idx] = 1;
+	switch (screen) {
+		case BRAIN_RING: {
+			rx_data = NRF24L01_Receive();
+			if (rx_data < 0x01 || rx_data > 0x08)
+			{
+				return;
 			}
+
+			uint8_t team_idx = rx_data - 1;
+			uint8_t is_false_start = (falstart_enabled && timer_running == 0);
+			if (pressed_btn_team || teams_answer_state[team_idx] || team_idx >= teams) {
+				return;
+			}
+
+			if (is_false_start) {
+				ILI9341_WriteString(7, team_y_pos[team_idx], team_names[team_idx], Font_11x18, BLACK, MYFON);
+				ILI9341_WriteString(175, team_y_pos[team_idx] + 2, "!", Font_11x18, RED, MYFON);
+
+				if(!teams_fs_state[team_idx]) {
+					beep(1000, 250);
+					teams_fs_state[team_idx] = 1;
+				}
+			}
+			else if (!teams_fs_state[team_idx] && timer_running) {
+				beep(1000, 250);
+				pressed_btn_team = rx_data;
+				teams_answer_state[team_idx] = 1;
+				ILI9341_WriteString(7, team_y_pos[team_idx], team_names[team_idx], Font_11x18, YELLOW, MYFON);
+				HAL_TIM_Base_Stop_IT(&htim2);
+			}
+			break;
 		}
-		else if (!teams_fs_state[team_idx] && timer_running) {
-			beep(1000, 250);
+
+		case SIMPLE: {
+			rx_data = NRF24L01_Receive();
+			if (rx_data < 0x01 || rx_data > 0x08) {
+				return;
+			}
+
+			uint8_t idx = rx_data - 1;
+			if (pressed_btn_team || teams_answer_state[idx] || idx >= teams) {
+				return;
+			}
+
 			pressed_btn_team = rx_data;
-			teams_answer_state[team_idx] = 1;
-			ILI9341_WriteString(7, team_y_pos[team_idx], team_names[team_idx], Font_11x18, YELLOW, MYFON);
-			HAL_TIM_Base_Stop_IT(&htim2);
+			teams_answer_state[idx] = 1;
+			ILI9341_WriteString(7, team_y_pos[idx], team_names[idx], Font_11x18, YELLOW, MYFON);
+			break;
 		}
 
-		break;
-	case SIMPLE:
-		rx_data = NRF24L01_Receive();
-		if (rx_data < 0x01 || rx_data > 0x08)
-		{
+		case ERUDIT: {
+			rx_data = NRF24L01_Receive();
+			if (rx_data < 0x01 || rx_data > 0x08) {
+				return;
+			}
+			uint8_t idx = rx_data - 1;
+			if (pressed_btn_team || teams_answer_state[idx] || idx >= teams) {
+				return;
+			}
+
+			pressed_btn_team = rx_data;
+			teams_answer_state[idx] = 1;
+			ILI9341_WriteString(7, team_y_pos[idx], team_names[idx], Font_11x18, YELLOW, MYFON);
+			break;
+		}
+
+		default:
 			return;
-		}
-
-		uint8_t idx = rx_data - 1;
-		if (pressed_btn_team || teams_answer_state[idx] || idx >= teams)
-		{
-			return;
-		}
-
-		pressed_btn_team = rx_data;
-		teams_answer_state[idx] = 1;
-		ILI9341_WriteString(7, team_y_pos[idx], team_names[idx], Font_11x18, YELLOW, MYFON);
-		break;
-	case ERUDIT:
-		break;
-	default:
-		return;
 	}
 }
 
@@ -259,27 +272,31 @@ void Touchscreen_handler(void)
 				for (uint8_t i = 0; i < 8; i++)
 					scores[i] = 0;
 
-				Reset_state(0);
+				screen = BRAIN_RING;
+				Reset_state(0, screen);
 
 				HAL_TIM_Base_Stop_IT(&htim2);
 				screen_Brain_Ring();
-				screen = BRAIN_RING;
+
 				break;
 			}
-			else if (IS_WITHIN(x, y, 120, 60, 200, 120)) // Simple selected
-			{
+			else if (IS_WITHIN(x, y, 120, 60, 200, 120)) { // Simple selected
 				for (uint8_t i = 0; i < 8; i++)
 					scores[i] = 0;
 
-				Reset_state(0);
-				screen_Simple();
 				screen = SIMPLE;
+				Reset_state(0, screen);
+				screen_Simple();
+
 				break;
 			}
-			else if (IS_WITHIN(x, y, 220, 60, 300, 120)) // Erudit Quartet selected
-			{
-				screen_Erudit_Quartet();
+			else if (IS_WITHIN(x, y, 220, 60, 300, 120)) { // Erudit Quartet selected
+				for (uint8_t i = 0; i < 8; i++) {
+					scores[i] = 0;
+				}
 				screen = ERUDIT;
+				Reset_state(0, screen);
+				screen_Erudit_Quartet();
 				break;
 			}
 			else if (IS_WITHIN(x, y, 20, 150, 300, 210)) // если нажали Settings

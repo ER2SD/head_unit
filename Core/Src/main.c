@@ -738,19 +738,26 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-void Main_loop_header(void)
-{
-	switch (screen)
-	{
+void Main_loop_header(void) {
+	switch (screen) {
 	case BRAIN_RING:
-		if ( 0 == g_timer_seconds)
-		{
+		if ( 0 == g_timer_seconds) {
 			beep(500, 1000);
 			LED_TGL;
 			HAL_TIM_Base_Stop_IT(&htim2);																		//Останавливаем таймер
-			Reset_state(1);
+			Reset_state(1, screen);
 		}
 		break;
+
+	case ERUDIT:
+		if ( 0 == g_timer_seconds) {
+			beep(500, 1000);
+			LED_TGL;
+			HAL_TIM_Base_Stop_IT(&htim2);																		//Останавливаем таймер
+			Reset_state(1, screen);
+		}
+		break;
+
 	default:
 		break;
 	}
@@ -775,19 +782,41 @@ void Main_loop_footer(void) {
 			}
 		}
 		break;
+
+	case ERUDIT:
+		if (reset_timer) {
+			reset_timer = 0;
+			sprintf(lcd_buf, "%02d ", g_timer_seconds);
+			ILI9341_WriteString(230, 25, lcd_buf, Font_16x26, RED, MYFON); // вывод показаний таймера
+		}
+		break;
+
 	default:
 		break;
 	}
 }
 
-void Reset_state(uint8_t redraw)
-{
+void Reset_state(uint8_t redraw, uint8_t screen) {
+
+	// check here what type of the game is selected, set the max timer value based on it
 	timer_running = 0;
-	g_timer_seconds = 60;
+
+	switch (screen) {
+	case BRAIN_RING:
+		g_timer_seconds = 60;
+		break;
+
+	case ERUDIT:
+		g_timer_seconds = 10;
+		break;
+
+	default:
+		break;
+	}
+
 	reset_timer = 1;
 	answer = 1;
-	if (redraw)
-	{
+	if (redraw) {
 		reset_color();
 		Reset_falstart_screen();
 	}
@@ -809,7 +838,7 @@ void Left_button_handler(void)
 
 		answer = 1;																//Положительный или отрицательный ответ
 		button_event_handler();							//Если ответ не верный-команда выбывает (цвет надписи команды чёрный)
-		Reset_state(1);
+		Reset_state(1, screen);
 		break;
 	case SIMPLE:
 		if (!pressed_btn_team){
@@ -818,7 +847,7 @@ void Left_button_handler(void)
 
 		answer = 1;
 		button_event_handler();
-		Reset_state(1);
+		Reset_state(1, screen);
 		break;
 	case ERUDIT:
 
@@ -846,9 +875,30 @@ void Center_button_short_handler(void) {
 			break;
 		case SIMPLE:
 			break;
+
 		case ERUDIT:
 			// check if there is no other team answered
+			if (pressed_btn_team) {	// already one team responded
+				return;
+			}
 
+			if(!timer_running) {
+				timer_running = 1;
+				NRF24_FlushRX();
+				HAL_TIM_Base_Start_IT(&htim2);
+				ILI9341_Draw_Filled_Rectangle_Coord(130, 220, 190, 240, WHITE);
+				ILI9341_WriteString(142, 225, "Stop", Font_7x10, BLUE, WHITE);
+			} else {
+				ILI9341_Draw_Filled_Rectangle_Coord(130, 220, 190, 240, WHITE);
+				ILI9341_WriteString(142, 225, "Start", Font_7x10, BLUE, WHITE);
+				timer_running = 0;
+				HAL_TIM_Base_Stop_IT(&htim2);
+			}
+
+			// also check here if the timer value is equal to 10 then beep
+			if(g_timer_seconds == 10) {
+				beep(800, 800);
+			}
 			break;
 		default:
 			return;
@@ -863,14 +913,18 @@ void Center_button_long_handler(void)
 		NRF24_FlushRX();
 		LED_OFF;
 		HAL_TIM_Base_Stop_IT(&htim2);
-		Reset_state(1);
+		Reset_state(1, screen);
 		break;
 	case SIMPLE:
 		NRF24_FlushRX();
 		LED_OFF;
-		Reset_state(1);
+		Reset_state(1, screen);
 		break;
 	case ERUDIT:
+		NRF24_FlushRX();
+		LED_OFF;
+		HAL_TIM_Base_Stop_IT(&htim2);
+		Reset_state(1, screen);
 		break;
 	default:
 		return;
