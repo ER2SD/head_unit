@@ -64,6 +64,7 @@ UART_HandleTypeDef huart2;
 char str1[64] =
 { 0 };
 volatile int g_timer_seconds = 0;				//Начальное значение таймера
+uint8_t g_timer_settings_erudit = 10;			//Erudit timer from settings
 volatile uint8_t reset_timer = 0;				//старт/стоп таймера
 uint8_t timer_running = 0;   					//0 = стоп, 1 = работает
 uint8_t btn_prev = 1;        					//предыдущее состояние кнопки
@@ -817,7 +818,7 @@ void Reset_state(uint8_t redraw, uint8_t screen) {
 		break;
 
 	case ERUDIT:
-		g_timer_seconds = 10;
+		g_timer_seconds = g_timer_settings_erudit;
 		ILI9341_Draw_Filled_Rectangle_Coord(130, 220, 190, 240, WHITE);
 		ILI9341_WriteString(142, 225, "Start", Font_7x10, BLUE, WHITE);
 		break;
@@ -915,17 +916,17 @@ void Center_button_short_handler(void) {
 				NRF24_FlushRX();
 				ILI9341_Draw_Filled_Rectangle_Coord(130, 220, 190, 240, WHITE);
 				ILI9341_WriteString(142, 225, "Stop", Font_7x10, BLUE, WHITE);
-				//HAL_TIM_Base_Start_IT(&htim2);
+				HAL_TIM_Base_Start_IT(&htim2);
 			} else {
 				timer_running = 0;
 				NRF24_FlushRX();
 				ILI9341_Draw_Filled_Rectangle_Coord(130, 220, 190, 240, WHITE);
 				ILI9341_WriteString(142, 225, "Start", Font_7x10, BLUE, WHITE);
-				//HAL_TIM_Base_Stop_IT(&htim2);
+				HAL_TIM_Base_Stop_IT(&htim2);
 			}
 
 			// also check here if the timer value is equal to 10 then beep
-			if(g_timer_seconds == 10) {
+			if(g_timer_seconds == g_timer_settings_erudit) {
 				beep(800, 800);
 				LED_OFF;
 			}
@@ -999,7 +1000,7 @@ void Right_button_handler(void)
 
 		answer = 0;
 		beep(800, 800);
-		g_timer_seconds = 10;
+		g_timer_seconds = g_timer_settings_erudit;
 		reset_timer = 1;
 		timer_running = 1;
 		button_event_handler();

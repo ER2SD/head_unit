@@ -61,30 +61,6 @@ extern uint8_t flag_press;
 extern uint16_t teams;
 extern char scope_buf[6];
 
-/*
-static inline void int16_to_str(int16_t val, char *buf, uint8_t maxlen)
-{
-	if (val == 0)
-	{
-		buf[0] = '0';
-		buf[1] = '\0';
-		return;
-	}
-	int8_t i = 0;
-	while (val > 0 && i < maxlen - 1)
-	{
-		buf[i++] = '0' + (val % 10);
-		val /= 10;
-	}
-	buf[i] = '\0';
-	for (uint8_t j = 0; j < i / 2; j++)
-	{
-		char t = buf[j];
-		buf[j] = buf[i - 1 - j];
-		buf[i - 1 - j] = t;
-	}
-}
-*/
 static inline void int16_to_str(int16_t val, char *buf, uint8_t maxlen)
 {
     if (maxlen == 0)

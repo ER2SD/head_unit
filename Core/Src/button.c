@@ -23,6 +23,7 @@ extern uint32_t time_press;
 extern uint16_t x;
 extern uint16_t y;
 extern game_screen screen;
+extern uint8_t g_timer_settings_erudit;
 extern char buf[64];
 
 extern int16_t scores[8];							//количество очков команд [0-7]
@@ -41,8 +42,7 @@ extern uint8_t question_id;							// question id
 // Set to GPIO_PIN_SET   if using Pull-Down (Pressed = VCC)
 #define BUTTON_PRESSED_LEVEL   GPIO_PIN_RESET
 
-static const char *const team_digits[] =
-{ "2", "3", "4", "5", "6", "7", "8" };
+static const char *const team_digits[] = { "2", "3", "4", "5", "6", "7", "8" };
 
 extern TIM_HandleTypeDef htim2;
 extern UART_HandleTypeDef huart1;
@@ -303,12 +303,19 @@ void Touchscreen_handler(void)
 				break;
 			}
 			else if (IS_WITHIN(x, y, 20, 150, 300, 210)) { // если нажали Settings
+
 				screen_setting();
 				//>>>>>>>>>>Блок сохранения количесва команд в игре
 				if (teams >= 2 && teams <= 8) {
 					ILI9341_WriteString(130, 110, team_digits[teams - 2], Font_16x26, WHITE, BLACK);
-					HAL_Delay(500);
+					//HAL_Delay(500);
 				}
+
+				// display the current erudit fimer value
+				memset(buf, 0, 64);
+				snprintf(buf, 64, "%i", g_timer_settings_erudit);
+				ILI9341_WriteString(255, 110, buf, Font_16x26, WHITE, BLACK);
+
 				//>>>>>>>>>>Настройки фальшстарта
 				if (falstart_enabled) {
 					ILI9341_WriteString(40, 80, "ON", Font_11x18, GREEN, RED);
@@ -373,13 +380,34 @@ void Touchscreen_handler(void)
 					HAL_Delay(500);
 				}
 			}
+			else if (IS_WITHIN(x, y, 240, 142, 276, 176)) { // add time to Erudit timers
+				// display the current erudit fimer value
+				g_timer_settings_erudit ++;
+				if(g_timer_settings_erudit > 90) {
+						g_timer_settings_erudit = 90;
+				}
+				memset(buf, 0, 64);
+				snprintf(buf, 64, "%i", g_timer_settings_erudit);
+				ILI9341_WriteString(255, 110, buf, Font_16x26, WHITE, BLACK);
+				HAL_Delay(500);
+			}
+			else if (IS_WITHIN(x, y, 180, 142, 216, 176)) { // remove time to Erudit timers
+				// display the current erudit fimer value
+				g_timer_settings_erudit --;
+				if(g_timer_settings_erudit < 10) {
+					g_timer_settings_erudit = 10;
+				}
+				memset(buf, 0, 64);
+				snprintf(buf, 64, "%i", g_timer_settings_erudit);
+				ILI9341_WriteString(255, 110, buf, Font_16x26, WHITE, BLACK);
+				HAL_Delay(500);
+			}
 			else if (IS_WITHIN(x, y, 30, 190, 140, 220)) { //обработчик кнопки "save"
 				screen_menu();
 				screen = MAIN_MENU;
 				break;
 			}
 			//-----------------------------------------------------------------------------------------------------------------------------------
-
 		default:
 			//Тут пишем код который не попал ни под один "case"
 			return;
