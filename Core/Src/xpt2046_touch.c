@@ -53,7 +53,7 @@ static const uint8_t zeroes_tx[] =
 { 0x00, 0x00 };
 
 extern uint16_t edit_score;
-extern uint16_t scores[8];
+extern int16_t scores[8];
 extern uint16_t screen;
 extern uint16_t x;
 extern uint16_t y;
@@ -61,7 +61,8 @@ extern uint8_t flag_press;
 extern uint16_t teams;
 extern char scope_buf[6];
 
-static inline void uint16_to_str(uint16_t val, char *buf, uint8_t maxlen)
+/*
+static inline void int16_to_str(int16_t val, char *buf, uint8_t maxlen)
 {
 	if (val == 0)
 	{
@@ -69,7 +70,7 @@ static inline void uint16_to_str(uint16_t val, char *buf, uint8_t maxlen)
 		buf[1] = '\0';
 		return;
 	}
-	uint8_t i = 0;
+	int8_t i = 0;
 	while (val > 0 && i < maxlen - 1)
 	{
 		buf[i++] = '0' + (val % 10);
@@ -83,6 +84,36 @@ static inline void uint16_to_str(uint16_t val, char *buf, uint8_t maxlen)
 		buf[i - 1 - j] = t;
 	}
 }
+*/
+static inline void int16_to_str(int16_t val, char *buf, uint8_t maxlen)
+{
+    if (maxlen == 0)
+        return;
+
+    memset(buf, 0, maxlen);
+
+    int32_t v = (int32_t)val;   /* widen so that -INT16_MIN (-32768) is safe */
+    char digits[6];
+    uint8_t n = 0;
+    uint8_t i = 0;
+
+    if (v < 0) {
+        v = -v;
+        if (i + 1 < maxlen)
+            buf[i++] = '-';
+    }
+
+    do {
+        if (n < 5)
+            digits[n++] = '0' + (v % 10);
+        v /= 10;
+    } while (v > 0);
+
+    while (n > 0 && i < maxlen - 1)
+        buf[i++] = digits[--n];
+    buf[i] = '\0';
+}
+
 
 uint8_t ILI9341_TouchGetCoordinates(uint16_t *x, uint16_t *y)
 {
@@ -140,13 +171,13 @@ void enable_score_editing(void)
 			{
 				if (j == i)
 					continue;
-				uint16_to_str(scores[j], scope_buf, sizeof(scope_buf));
+				int16_to_str(scores[j], scope_buf, sizeof(scope_buf));
 				uint16_t j_ytop = EDIT_ZONE_START_Y + j * EDIT_ZONE_ROW_STEP;
 				ILI9341_WriteString(135, j_ytop, scope_buf, Font_11x18, WHITE, MYFON);
 			}
 
 			edit_score = i + 1;
-			uint16_to_str(scores[i], scope_buf, sizeof(scope_buf));
+			int16_to_str(scores[i], scope_buf, sizeof(scope_buf));
 			ILI9341_WriteString(135, y_top, scope_buf, Font_11x18, ORANGE, MYFON);
 			draw_edit_buttons();
 			return;
@@ -172,7 +203,7 @@ void score_editing_handler(void)
 	if (Button_Read_left())
 	{
 		scores[idx]++;
-		uint16_to_str(scores[idx], scope_buf, sizeof(scope_buf));
+		int16_to_str(scores[idx], scope_buf, sizeof(scope_buf));
 		ILI9341_WriteString(135, y_pos, scope_buf, Font_11x18, ORANGE, MYFON);
 	}
 
@@ -180,7 +211,7 @@ void score_editing_handler(void)
 	{
 		if (scores[idx] > 0)
 			scores[idx]--;
-		uint16_to_str(scores[idx], scope_buf, sizeof(scope_buf));
+		int16_to_str(scores[idx], scope_buf, sizeof(scope_buf));
 		ILI9341_WriteString(135, y_pos, scope_buf, Font_11x18, ORANGE, MYFON);
 	}
 

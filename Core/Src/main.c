@@ -63,10 +63,11 @@ UART_HandleTypeDef huart2;
 /* USER CODE BEGIN PV */
 char str1[64] =
 { 0 };
-volatile int g_timer_seconds = 60;				//Начальное значение таймера
+volatile int g_timer_seconds = 0;				//Начальное значение таймера
 volatile uint8_t reset_timer = 0;				//старт/стоп таймера
 uint8_t timer_running = 0;   					//0 = стоп, 1 = работает
 uint8_t btn_prev = 1;        					//предыдущее состояние кнопки
+uint8_t question_id = 1;						//the current question index, for Erudit Quartet can be up to 5
 char lcd_buf[16];								//буфер значения таймера
 uint16_t teams = 2;								//номер команды
 uint16_t teams_answer_state[8] =
@@ -74,19 +75,16 @@ uint16_t teams_answer_state[8] =
 uint16_t teams_fs_state[8] =
 { 0 };											// Teams false start state
 uint16_t pressed_btn_team = 0;					//номер нажатой кнопки команды
-uint16_t scores[8] =
-{ 0 };											//количество очков команд [0-7]
+int16_t scores[8] = { 0 };						//количество очков команд [0-7]
 uint16_t answer = 1;							//положительный или отрицательный ответ
 uint8_t rx_data;								//номер нажатой кнопки передатчика
 uint16_t falstart_enabled = 0;
 uint8_t flag_press = 1;
 uint32_t time_press = 0;
-char buf[64] =
-{ 0, };
+char buf[64] = { 0, };
 uint16_t x = 0;
 uint16_t y = 0;
-enum
-{
+enum {
 	NONE = 0, SHORT = 1, LONG = 2
 };
 
@@ -446,9 +444,8 @@ static void MX_SPI2_Init(void)
   hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
   hspi2.Init.CRCPolynomial = 10;
-  if (HAL_SPI_Init(&hspi2) != HAL_OK)
-  {
-    Error_Handler();
+  if (HAL_SPI_Init(&hspi2) != HAL_OK) {
+	  Error_Handler();
   }
   /* USER CODE BEGIN SPI2_Init 2 */
 
@@ -787,8 +784,15 @@ void Main_loop_footer(void) {
 		if (reset_timer) {
 			reset_timer = 0;
 			sprintf(lcd_buf, "%02d ", g_timer_seconds);
-			ILI9341_WriteString(230, 25, lcd_buf, Font_16x26, RED, MYFON); // вывод показаний таймера
+			ILI9341_WriteString(230, 25, lcd_buf, Font_16x26, RED, MYFON); // show the current timer value
 		}
+
+		// display the current question id
+		sprintf(lcd_buf, "%02d ", question_id * 10);
+		ILI9341_WriteString(230, 75, lcd_buf, Font_16x26, GREEN, MYFON); // show the current question value
+
+		sprintf(lcd_buf, "%02d ", question_id);
+		ILI9341_WriteString(230, 120, lcd_buf, Font_16x26, WHITE, MYFON); // show the current question number
 		break;
 
 	default:
@@ -820,6 +824,8 @@ void Reset_state(uint8_t redraw, uint8_t screen) {
 		reset_color();
 		Reset_falstart_screen();
 	}
+	ILI9341_Draw_Filled_Rectangle_Coord(130, 220, 190, 240, WHITE);
+	ILI9341_WriteString(142, 225, "Start", Font_7x10, BLUE, WHITE);
 	Reset_answer_state();
 	Reset_falstart_state();
 	pressed_btn_team = 0;
@@ -850,7 +856,13 @@ void Left_button_handler(void)
 		Reset_state(1, screen);
 		break;
 	case ERUDIT:
+		if (!pressed_btn_team){
+			return;
+		}
 
+		answer = 1;
+		button_event_handler();
+		Reset_state(1, screen);
 		break;
 	default:
 		return;
@@ -972,6 +984,12 @@ void Right_button_handler(void)
 		pressed_btn_team = 0;
 		break;
 	case ERUDIT:
+		if (!pressed_btn_team) {
+			return;
+		}
+		answer = 0;
+		button_event_handler();
+		pressed_btn_team = 0;
 		break;
 	default:
 		return;

@@ -15,8 +15,9 @@
 extern game_screen screen;
 extern uint16_t teams;
 extern uint16_t pressed_btn_team;
-extern uint16_t scores[8];
+extern int16_t scores[8];
 extern uint16_t answer;
+extern uint8_t question_id;
 char scope_buf[16];
 
 #define TEAM_LABEL_X      7
@@ -25,7 +26,8 @@ char scope_buf[16];
 #define TEAM_ROW_STEP     20
 #define MAX_TEAMS         8
 
-static inline void uint16_to_str(uint16_t val, char *buf, uint8_t maxlen)
+/*
+static inline void int16_to_str(int16_t val, char *buf, uint8_t maxlen)
 {
 	if (val == 0)
 	{
@@ -47,6 +49,37 @@ static inline void uint16_to_str(uint16_t val, char *buf, uint8_t maxlen)
 		buf[i - 1 - j] = t;
 	}
 }
+*/
+
+static inline void int16_to_str(int16_t val, char *buf, uint8_t maxlen)
+{
+    if (maxlen == 0)
+        return;
+
+    memset(buf, 0, maxlen);
+
+    int32_t v = (int32_t)val;   /* widen so that -INT16_MIN (-32768) is safe */
+    char digits[6];
+    uint8_t n = 0;
+    uint8_t i = 0;
+
+    if (v < 0) {
+        v = -v;
+        if (i + 1 < maxlen)
+            buf[i++] = '-';
+    }
+
+    do {
+        if (n < 5)
+            digits[n++] = '0' + (v % 10);
+        v /= 10;
+    } while (v > 0);
+
+    while (n > 0 && i < maxlen - 1)
+        buf[i++] = digits[--n];
+    buf[i] = '\0';
+}
+
 
 static inline void draw_team_name(uint8_t idx, uint16_t color)
 {
@@ -56,7 +89,7 @@ static inline void draw_team_name(uint8_t idx, uint16_t color)
 
 static inline void draw_team_score(uint8_t idx, uint16_t color)
 {
-	uint16_to_str(scores[idx], scope_buf, sizeof(scope_buf));
+	int16_to_str(scores[idx], scope_buf, sizeof(scope_buf));
 	ILI9341_WriteString(TEAM_SCORE_X, TEAM_START_Y + idx * TEAM_ROW_STEP, scope_buf, Font_11x18, color, MYFON);
 }
 
@@ -186,6 +219,12 @@ void screen_Erudit_Quartet(void) {
 	ILI9341_Draw_Filled_Rectangle_Coord(299, 1, 319, 21, BLACK);
 	ILI9341_Random_line(302, 4, 315, 16, WHITE);
 	ILI9341_Random_line(302, 16, 315, 4, WHITE);
+
+	// the part for the current question value
+	ILI9341_WriteString(230, 60, "Points", Font_7x10, BLUE, MYFON);
+
+	// the part for the question ID
+	ILI9341_WriteString(230, 105, "Question", Font_7x10, BLUE, MYFON);
 }
 
 //============= экран настроек =====================
@@ -239,12 +278,45 @@ void button_event_handler(void)
 
 	uint8_t idx = pressed_btn_team - 1;
 
-	if (answer == 1)
-	{
-		scores[idx]++;
+	if (answer == 1) {
+		switch(screen) {
+			case BRAIN_RING: {
+				scores[idx]++;
+				break;
+			}
+
+			case ERUDIT: {
+				scores[idx] += question_id * 10;
+				question_id ++;
+				if(question_id > 5) {
+					question_id = 1;
+				}
+				break;
+			}
+
+			default:
+				break;
+		}
+	} else {
+		if(answer == 0) {
+			switch(screen) {
+				case ERUDIT: {
+					scores[idx] -= question_id * 10;
+					question_id ++;
+					if(question_id > 5) {
+						question_id = 1;
+					}
+					break;
+				}
+
+				default:
+					break;
+			}
+		}
 	}
 
-	uint16_to_str(scores[idx], scope_buf, sizeof(scope_buf));
+	int16_to_str(scores[idx], scope_buf, sizeof(scope_buf));
+	ILI9341_WriteString(TEAM_SCORE_X, TEAM_START_Y + idx * TEAM_ROW_STEP, "   ", Font_11x18, WHITE, MYFON);
 	ILI9341_WriteString(TEAM_SCORE_X, TEAM_START_Y + idx * TEAM_ROW_STEP, scope_buf, Font_11x18, WHITE, MYFON);
 
 	draw_team_name(idx, (answer == 0) ? BLACK : WHITE);

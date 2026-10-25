@@ -25,7 +25,7 @@ extern uint16_t y;
 extern game_screen screen;
 extern char buf[64];
 
-extern uint16_t scores[8];							//количество очков команд [0-7]
+extern int16_t scores[8];							//количество очков команд [0-7]
 
 extern volatile int g_timer_seconds;				//Начальное значение таймера
 extern volatile uint8_t reset_timer;		//старт/стоп таймера
@@ -342,6 +342,7 @@ void Touchscreen_handler(void)
 			}
 			break;
 		case ERUDIT:
+			enable_score_editing(); //редактирование результата
 			if (x > 300 && x < 320 && y > 0 && y < 20) //если нажали крестик
 			{
 				screen_menu();
