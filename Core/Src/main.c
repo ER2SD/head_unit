@@ -740,7 +740,7 @@ void Main_loop_header(void) {
 	case BRAIN_RING:
 		if ( 0 == g_timer_seconds) {
 			beep(500, 1000);
-			LED_TGL;
+			LED_ON;
 			HAL_TIM_Base_Stop_IT(&htim2);																		//Останавливаем таймер
 			Reset_state(1, screen);
 		}
@@ -749,10 +749,13 @@ void Main_loop_header(void) {
 	case ERUDIT:
 		if ( 0 == g_timer_seconds) {
 			beep(500, 1000);
-			LED_TGL;
+			LED_ON;
 			HAL_TIM_Base_Stop_IT(&htim2);																		//Останавливаем таймер
 			Reset_state(1, screen);
 			question_id++;
+			if(question_id > 5) {
+				question_id = 1;
+			}
 		}
 		break;
 
@@ -895,6 +898,7 @@ void Center_button_short_handler(void) {
 			// also check here if the timer value is equal to 10 then beep
 			if(g_timer_seconds == 60) {
 				beep(800, 800);
+				LED_OFF;
 			}
 			break;
 		case SIMPLE:
@@ -909,19 +913,21 @@ void Center_button_short_handler(void) {
 			if(!timer_running) {
 				timer_running = 1;
 				NRF24_FlushRX();
-				HAL_TIM_Base_Start_IT(&htim2);
 				ILI9341_Draw_Filled_Rectangle_Coord(130, 220, 190, 240, WHITE);
 				ILI9341_WriteString(142, 225, "Stop", Font_7x10, BLUE, WHITE);
+				//HAL_TIM_Base_Start_IT(&htim2);
 			} else {
+				timer_running = 0;
+				NRF24_FlushRX();
 				ILI9341_Draw_Filled_Rectangle_Coord(130, 220, 190, 240, WHITE);
 				ILI9341_WriteString(142, 225, "Start", Font_7x10, BLUE, WHITE);
-				timer_running = 0;
-				HAL_TIM_Base_Stop_IT(&htim2);
+				//HAL_TIM_Base_Stop_IT(&htim2);
 			}
 
 			// also check here if the timer value is equal to 10 then beep
 			if(g_timer_seconds == 10) {
 				beep(800, 800);
+				LED_OFF;
 			}
 			break;
 		default:

@@ -24,7 +24,7 @@
 
 #define EDIT_ZONE_X_MIN 140
 #define EDIT_ZONE_X_MAX 170
-#define EDIT_ZONE_START_Y 50
+#define EDIT_ZONE_START_Y 51
 #define EDIT_ZONE_ROW_STEP 20
 #define MAX_TEAMS 8
 
@@ -185,33 +185,52 @@ void enable_score_editing(void)
 	}
 }
 
-void score_editing_handler(void)
-{
-	if (screen == MAIN_MENU || screen == SETTINGS)
-	{
+void score_editing_handler(void) {
+	if (screen == MAIN_MENU || screen == SETTINGS) {
 		return;
 	}
 
-	if (edit_score < 1 || edit_score > teams)
-	{
+	if (edit_score < 1 || edit_score > teams) {
 		return;
 	}
 
 	uint8_t idx = edit_score - 1;
 	uint16_t y_pos = EDIT_ZONE_START_Y + idx * EDIT_ZONE_ROW_STEP;
 
-	if (Button_Read_left())
-	{
-		scores[idx]++;
+	if (Button_Read_left()) {
+		switch(screen) {
+			case ERUDIT: {
+				scores[idx] += 10;
+				break;
+				}
+
+			default: {
+				scores[idx]++;
+				break;
+				}
+		}
+
 		int16_to_str(scores[idx], scope_buf, sizeof(scope_buf));
+		ILI9341_WriteString(135, y_pos, "    ", Font_11x18, ORANGE, MYFON);
 		ILI9341_WriteString(135, y_pos, scope_buf, Font_11x18, ORANGE, MYFON);
 	}
 
-	if (Button_Read_right())
-	{
-		if (scores[idx] > 0)
-			scores[idx]--;
+	if (Button_Read_right()) {
+		switch(screen) {
+			case ERUDIT: {
+				scores[idx] -= 10;
+				break;
+				}
+
+			default: {
+				if (scores[idx] > 0)
+				scores[idx]--;
+				break;
+				}
+		}
+
 		int16_to_str(scores[idx], scope_buf, sizeof(scope_buf));
+		ILI9341_WriteString(135, y_pos, "    ", Font_11x18, ORANGE, MYFON);
 		ILI9341_WriteString(135, y_pos, scope_buf, Font_11x18, ORANGE, MYFON);
 	}
 

@@ -28,12 +28,12 @@ extern char buf[64];
 extern int16_t scores[8];							//количество очков команд [0-7]
 
 extern volatile int g_timer_seconds;				//Начальное значение таймера
-extern volatile uint8_t reset_timer;		//старт/стоп таймера
-extern uint16_t teams;									//номер команды
-extern uint16_t teams_answer_state[8];          // Teams answer state
-extern uint16_t teams_fs_state[8];          // Teams false start state
-extern uint16_t answer;											//положительный или отрицательный ответ
-
+extern volatile uint8_t reset_timer;				//старт/стоп таймера
+extern uint16_t teams;								//номер команды
+extern uint16_t teams_answer_state[8];         		// Teams answer state
+extern uint16_t teams_fs_state[8];          		// Teams false start state
+extern uint16_t answer;								//положительный или отрицательный ответ
+extern uint8_t question_id;							// question id
 // macros to check the coordinates in range
 #define IS_WITHIN(x, y, x1, y1, x2, y2) ((x) > (x1)) && ((x) < (x2)) && ((y) > (y1)) && ((y) < (y2))
 
@@ -273,6 +273,7 @@ void Touchscreen_handler(void)
 					scores[i] = 0;
 
 				screen = BRAIN_RING;
+				LED_OFF;
 				Reset_state(0, screen);
 
 				HAL_TIM_Base_Stop_IT(&htim2);
@@ -295,27 +296,25 @@ void Touchscreen_handler(void)
 					scores[i] = 0;
 				}
 				screen = ERUDIT;
+				LED_OFF;
+				question_id = 1;
 				Reset_state(0, screen);
 				screen_Erudit_Quartet();
 				break;
 			}
-			else if (IS_WITHIN(x, y, 20, 150, 300, 210)) // если нажали Settings
-			{
+			else if (IS_WITHIN(x, y, 20, 150, 300, 210)) { // если нажали Settings
 				screen_setting();
 				//>>>>>>>>>>Блок сохранения количесва команд в игре
-				if (teams >= 2 && teams <= 8)
-				{
+				if (teams >= 2 && teams <= 8) {
 					ILI9341_WriteString(130, 110, team_digits[teams - 2], Font_16x26, WHITE, BLACK);
 					HAL_Delay(500);
 				}
 				//>>>>>>>>>>Настройки фальшстарта
-				if (falstart_enabled)
-				{
+				if (falstart_enabled) {
 					ILI9341_WriteString(40, 80, "ON", Font_11x18, GREEN, RED);
 					ILI9341_WriteString(100, 80, "OFF", Font_11x18, DARKGREY, RED);
 				}
-				else
-				{
+				else {
 					ILI9341_WriteString(40, 80, "ON", Font_11x18, DARKGREY, RED);
 					ILI9341_WriteString(100, 80, "OFF", Font_11x18, GREEN, RED);
 				}
@@ -323,70 +322,58 @@ void Touchscreen_handler(void)
 				break;
 			}
 		case BRAIN_RING:
-			if (!timer_running)
-			{
+			if (!timer_running) {
 				enable_score_editing(); //редактирование результата
 			}
-			if (IS_WITHIN(x, y, 300, 0, 320, 20)) //если нажали крестик
-			{
+			if (IS_WITHIN(x, y, 300, 0, 320, 20)) { //если нажали крестик
 				screen_menu();
 				screen = MAIN_MENU;
 			}
 			break;
 		case SIMPLE:
 			enable_score_editing();
-			if (IS_WITHIN(x, y, 300, 0, 320, 20)) //если нажали крестик
-			{
+			if (IS_WITHIN(x, y, 300, 0, 320, 20)) { //если нажали крестик
 				screen_menu();
 				screen = MAIN_MENU;
 			}
 			break;
 		case ERUDIT:
 			enable_score_editing(); //редактирование результата
-			if (x > 300 && x < 320 && y > 0 && y < 20) //если нажали крестик
-			{
+			if (x > 300 && x < 320 && y > 0 && y < 20) {//если нажали крестик
 				screen_menu();
 				screen = MAIN_MENU;
 			}
 			break;
 		case SETTINGS: 	//=============="setting"=================
-			if (IS_WITHIN(x, y, 300, 0, 320, 20)) // если нажали крестик
-			{
+			if (IS_WITHIN(x, y, 300, 0, 320, 20)) { // если нажали крестик
 				screen_menu();
 				screen = MAIN_MENU;
 			}
-			else if (IS_WITHIN(x, y, 40, 80, 60, 100)) //Фальшстарт ON
-			{
+			else if (IS_WITHIN(x, y, 40, 80, 60, 100)) {//Фальшстарт ON
 				falstart_enabled = 1;
 				ILI9341_WriteString(40, 80, "ON", Font_11x18, GREEN, RED);
 				ILI9341_WriteString(100, 80, "OFF", Font_11x18, DARKGREY, RED);
 			}
-			else if (IS_WITHIN(x, y, 100, 80, 130, 100)) //Фальшстарт OFF
-			{
+			else if (IS_WITHIN(x, y, 100, 80, 130, 100)) { //Фальшстарт OFF
 				falstart_enabled = 0;
 				ILI9341_WriteString(40, 80, "ON", Font_11x18, DARKGREY, RED);
 				ILI9341_WriteString(100, 80, "OFF", Font_11x18, GREEN, RED);
 			}
-			else if (IS_WITHIN(x, y, 30, 142, 68, 175)) //Если добавляем комманды "-"
-			{
+			else if (IS_WITHIN(x, y, 30, 142, 68, 175)) {//Если добавляем комманды "-"
 				teams--;
-				if (teams >= 2 && teams <= 8)
-				{
+				if (teams >= 2 && teams <= 8) {
 					ILI9341_WriteString(130, 110, team_digits[teams - 2], Font_16x26, WHITE, BLACK);
 					HAL_Delay(500);
 				}
 			}
-			else if (IS_WITHIN(x, y, 90, 142, 128, 175)) //Если удаляем комманды "+"
-			{
+			else if (IS_WITHIN(x, y, 90, 142, 128, 175)) {//Если удаляем комманды "+"
 				teams++;
-				if (teams >= 2 && teams <= 8)
-				{
+				if (teams >= 2 && teams <= 8) {
 					ILI9341_WriteString(130, 110, team_digits[teams - 2], Font_16x26, WHITE, BLACK);
 					HAL_Delay(500);
 				}
 			}
-			else if (IS_WITHIN(x, y, 30, 190, 140, 220)) //обработчик кнопки "save"
-			{
+			else if (IS_WITHIN(x, y, 30, 190, 140, 220)) { //обработчик кнопки "save"
 				screen_menu();
 				screen = MAIN_MENU;
 				break;
@@ -399,8 +386,8 @@ void Touchscreen_handler(void)
 		}
 
 	}
-	if (!flag_press && (HAL_GetTick() - time_press) > 200) // задержка до следующего нажатия
-	{
+
+	if (!flag_press && (HAL_GetTick() - time_press) > 200) { // задержка до следующего нажатия
 		flag_press = 1;
 	}
 }
