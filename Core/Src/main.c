@@ -809,6 +809,8 @@ void Reset_state(uint8_t redraw, uint8_t screen) {
 	switch (screen) {
 	case BRAIN_RING:
 		g_timer_seconds = 60;
+		ILI9341_Draw_Filled_Rectangle_Coord(130, 220, 190, 240, WHITE);
+		ILI9341_WriteString(142, 225, "Start", Font_7x10, BLUE, WHITE);
 		break;
 
 	case ERUDIT:
