@@ -130,9 +130,9 @@ static void draw_edit_buttons(void)
 	BUTTON_SAVE_X + BUTTON_SAVE_W, BUTTON_SAVE_Y + BUTTON_SAVE_H, WHITE);
 	ILI9341_Draw_Filled_Rectangle_Coord(BUTTON_MINUS_X, BUTTON_MINUS_Y,
 	BUTTON_MINUS_X + BUTTON_MINUS_W, BUTTON_MINUS_Y + BUTTON_MINUS_H, WHITE);
-	ILI9341_WriteString(30, BUTTON_Y, "+", Font_7x10, BLUE, WHITE);
+	ILI9341_WriteString(30, BUTTON_Y, "-", Font_7x10, BLUE, WHITE);
 	ILI9341_WriteString(142, BUTTON_Y, "Save", Font_7x10, BLUE, WHITE);
-	ILI9341_WriteString(272, BUTTON_Y, "-", Font_7x10, BLUE, WHITE);
+	ILI9341_WriteString(272, BUTTON_Y, "+", Font_7x10, BLUE, WHITE);
 }
 
 void enable_score_editing(void)
@@ -175,39 +175,39 @@ void score_editing_handler(void) {
 
 	if (Button_Read_left()) {
 		switch(screen) {
-			case ERUDIT: {
-				scores[idx] += 10;
-				break;
+					case ERUDIT: {
+						scores[idx] -= 10;
+						break;
+						}
+
+					default: {
+						if (scores[idx] > 0)
+						scores[idx]--;
+						break;
+						}
 				}
 
-			default: {
-				scores[idx]++;
-				break;
-				}
-		}
-
-		int16_to_str(scores[idx], scope_buf, sizeof(scope_buf));
-		ILI9341_WriteString(135, y_pos, "    ", Font_11x18, ORANGE, MYFON);
-		ILI9341_WriteString(135, y_pos, scope_buf, Font_11x18, ORANGE, MYFON);
+				int16_to_str(scores[idx], scope_buf, sizeof(scope_buf));
+				ILI9341_WriteString(135, y_pos, "    ", Font_11x18, ORANGE, MYFON);
+				ILI9341_WriteString(135, y_pos, scope_buf, Font_11x18, ORANGE, MYFON);
 	}
 
 	if (Button_Read_right()) {
 		switch(screen) {
-			case ERUDIT: {
-				scores[idx] -= 10;
-				break;
+					case ERUDIT: {
+						scores[idx] += 10;
+						break;
+						}
+
+					default: {
+						scores[idx]++;
+						break;
+						}
 				}
 
-			default: {
-				if (scores[idx] > 0)
-				scores[idx]--;
-				break;
-				}
-		}
-
-		int16_to_str(scores[idx], scope_buf, sizeof(scope_buf));
-		ILI9341_WriteString(135, y_pos, "    ", Font_11x18, ORANGE, MYFON);
-		ILI9341_WriteString(135, y_pos, scope_buf, Font_11x18, ORANGE, MYFON);
+				int16_to_str(scores[idx], scope_buf, sizeof(scope_buf));
+				ILI9341_WriteString(135, y_pos, "    ", Font_11x18, ORANGE, MYFON);
+				ILI9341_WriteString(135, y_pos, scope_buf, Font_11x18, ORANGE, MYFON);
 	}
 
 	if (edit_score != 0 && Button_Read_center())
@@ -217,9 +217,9 @@ void score_editing_handler(void) {
 		{
 			start="     ";
 		}
-		ILI9341_WriteString(30, BUTTON_Y, "Yes", Font_7x10, BLUE, WHITE);
+		ILI9341_WriteString(30, BUTTON_Y, "No", Font_7x10, BLUE, WHITE);
 		ILI9341_WriteString(142, BUTTON_Y, start, Font_7x10, BLUE, WHITE);
-		ILI9341_WriteString(272, BUTTON_Y, "No", Font_7x10, BLUE, WHITE);
+		ILI9341_WriteString(272, BUTTON_Y, "Yes", Font_7x10, BLUE, WHITE);
 		edit_score = 0;
 		render_scores(teams);
 	}

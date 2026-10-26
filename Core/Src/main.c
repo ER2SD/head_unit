@@ -849,27 +849,39 @@ void Left_button_handler(void)
 			return;
 		}
 
-		answer = 1;																//Положительный или отрицательный ответ
+		if (answer)
+		{
+			g_timer_seconds = 20;
+			reset_timer = 1;
+		}
+
+		timer_running = 0;
+		answer = 0;
 		button_event_handler();							//Если ответ не верный-команда выбывает (цвет надписи команды чёрный)
-		Reset_state(1, screen);
+		pressed_btn_team = 0;
 		break;
 	case SIMPLE:
-		if (!pressed_btn_team){
+		if (!pressed_btn_team)
+		{
 			return;
 		}
 
-		answer = 1;
+		answer = 0;
 		button_event_handler();
-		Reset_state(1, screen);
+		pressed_btn_team = 0;
 		break;
 	case ERUDIT:
-		if (!pressed_btn_team){
+		if (!pressed_btn_team) {
 			return;
 		}
 
-		answer = 1;
+		answer = 0;
+		beep(800, 800);
+		g_timer_seconds = g_timer_settings_erudit;
+		reset_timer = 1;
+		timer_running = 1;
 		button_event_handler();
-		Reset_state(1, screen);
+		pressed_btn_team = 0;
 		break;
 	default:
 		return;
@@ -972,39 +984,27 @@ void Right_button_handler(void)
 			return;
 		}
 
-		if (answer)
-		{
-			g_timer_seconds = 20;
-			reset_timer = 1;
-		}
-
-		timer_running = 0;
-		answer = 0;
+		answer = 1;																//Положительный или отрицательный ответ
 		button_event_handler();							//Если ответ не верный-команда выбывает (цвет надписи команды чёрный)
-		pressed_btn_team = 0;
+		Reset_state(1, screen);
 		break;
 	case SIMPLE:
-		if (!pressed_btn_team)
-		{
+		if (!pressed_btn_team){
 			return;
 		}
 
-		answer = 0;
+		answer = 1;
 		button_event_handler();
-		pressed_btn_team = 0;
+		Reset_state(1, screen);
 		break;
 	case ERUDIT:
-		if (!pressed_btn_team) {
+		if (!pressed_btn_team){
 			return;
 		}
 
-		answer = 0;
-		beep(800, 800);
-		g_timer_seconds = g_timer_settings_erudit;
-		reset_timer = 1;
-		timer_running = 1;
+		answer = 1;
 		button_event_handler();
-		pressed_btn_team = 0;
+		Reset_state(1, screen);
 		break;
 	default:
 		return;
