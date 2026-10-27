@@ -81,7 +81,7 @@ void show_coordinate_grid()
 void tournament_table() {
 	for (uint16_t z = 50; z < 220; z += 20)
 		ILI9341_Draw_Horizontal_Line(120, z, 80, RED);
-	for (uint16_t h = 120; h < 201; h += 40)
+	for (uint16_t h = 120; h < 201; h += 80)
 		ILI9341_Draw_Vertical_Line(h, 50, 160, RED);
 }
 // simplified table
